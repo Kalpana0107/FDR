@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+/* ===== Sentinel Navy theme tokens =====
+   Use ONLY these tokens (bg-surface, text-ink, bg-brand, ...) in components. */
+@theme {
+  --color-surface: #F6F8FC;
+  --color-card: #FFFFFF;
+  --color-line: #E3E8F2;
+  --color-brand: #3B5BDB;
+  --color-brand-dark: #2F49B5;
+  --color-ink: #0B1B3A;
+  --color-muted: #5B6B8C;
+  --color-navy: #0B1B3A;
+  --color-indigo-deep: #1E2A78;
+
+  /* status palettes: 50 = background, 200 = ring, 700 = text */
+  --color-ok-50: #E8F7EE;   --color-ok-200: #A7E0BE;   --color-ok-700: #157A45;
+  --color-warn-50: #FFF6E0; --color-warn-200: #F6D88A; --color-warn-700: #9A6700;
+  --color-ret-50: #FFEEE0;  --color-ret-200: #FBC79B;  --color-ret-700: #B54708;
+  --color-bad-50: #FDECEC;  --color-bad-200: #F5B5B5;  --color-bad-700: #B42318;
+  --color-info-50: #E8F0FF; --color-info-200: #B5CBFA; --color-info-700: #2446B8;
+  --color-renew-50: #EEEAFD; --color-renew-200: #C9BEF7; --color-renew-700: #4B31B5;
+  --color-done-50: #EEF1F5; --color-done-200: #CBD3DF;  --color-done-700: #475467;
+
+  --font-heading: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer base {
+  body {
+    @apply bg-surface text-ink font-sans antialiased;
+  }
+  h1, h2, h3, h4 {
+    @apply font-heading text-ink;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-card border border-line rounded-2xl p-5 shadow-sm;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed bg-brand text-white hover:bg-brand-dark;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed bg-card text-ink border border-line hover:bg-surface;
+  }
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed bg-bad-700 text-white hover:opacity-90;
+  }
+  .hero {
+    @apply rounded-2xl text-white p-8;
+    background: linear-gradient(135deg, var(--color-navy) 0%, var(--color-indigo-deep) 55%, var(--color-brand) 100%);
+  }
+  .hero h1, .hero h2 {
+    @apply text-white;
+  }
+  .mono {
+    @apply font-mono text-sm;
+  }
+  .chip-simulated {
+    @apply inline-flex items-center rounded-full border border-dashed border-warn-200 bg-warn-50 px-2 py-0.5 text-xs font-medium text-warn-700;
+  }
+}
