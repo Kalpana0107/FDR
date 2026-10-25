@@ -67,6 +67,9 @@ class FDRRecord(Base):
     documents = relationship("Document", back_populates="fdr_record", cascade="all, delete-orphan")
     status_history = relationship("StatusHistory", back_populates="fdr_record", order_by="StatusHistory.created_at")
     audit_events = relationship("AuditEvent", back_populates="fdr_record")
+    versions = relationship("FDRVersion", back_populates="fdr_record", order_by="FDRVersion.version_number")
+    release_requests = relationship("ReleaseRequest", back_populates="fdr_record", order_by="ReleaseRequest.requested_at")
+    bank_verifications = relationship("BankVerification", back_populates="fdr_record", order_by="BankVerification.checked_at")
     parent_fdr = relationship("FDRRecord", remote_side=[id], backref="renewals")
 
     __table_args__ = (
