@@ -1,5 +1,5 @@
 import enum
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import (
     Column, Integer, String, DateTime, Enum, ForeignKey,
     Text, Numeric, Date, Index
@@ -9,12 +9,23 @@ from ..core.database import Base
 
 
 class FDRStatus(str, enum.Enum):
+    # These exact string values match the API contract docs
     DRAFT = "draft"
-    SUBMITTED = "submitted"
-    UNDER_REVIEW = "under_review"
-    RETURNED = "returned"
-    VERIFIED = "verified"
-    REJECTED = "rejected"
+    SUBMITTED = "Submitted"
+    UNDER_REVIEW = "Under Review"
+    VERIFIED = "Verified"
+    ACTIVE = "Active"
+    MATURING = "Maturing"
+    RETURNED = "Returned"
+    REJECTED = "Rejected"
+    RENEWED = "Renewed"
+    RELEASE_IN_PROGRESS = "Release in Progress"
+    RELEASED = "Released"
+    WITHDRAWN = "Withdrawn"
+
+
+def _utcnow():
+    return datetime.now(timezone.utc)
 
 
 class FDRRecord(Base):
@@ -42,10 +53,10 @@ class FDRRecord(Base):
     status = Column(Enum(FDRStatus), nullable=False, default=FDRStatus.DRAFT)
     admin_remark = Column(Text, nullable=True)  # Latest remark from admin
 
-    # Timestamps
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    submitted_at = Column(DateTime, nullable=True)
+    # Timestamps (timezone-aware)
+    created_at = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow)
+    submitted_at = Column(DateTime(timezone=True), nullable=True)
 
     # Relationships
     institution = relationship("Institution", back_populates="fdr_records")

@@ -1,4 +1,6 @@
+import os
 from pydantic_settings import BaseSettings
+from pydantic import model_validator
 from typing import Optional
 
 
@@ -6,10 +8,13 @@ class Settings(BaseSettings):
     # Database
     DATABASE_URL: str = "postgresql://fdrguard:fdrguard_dev_pass@localhost:5432/fdrguard"
 
-    # JWT
-    SECRET_KEY: str = "change_this_to_a_random_secret_key_at_least_32_chars"
+    # JWT — no default; must be set in production
+    SECRET_KEY: Optional[str] = None
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 480
+
+    # Environment: "dev" | "staging" | "production"
+    ENV: str = "dev"
 
     # File Storage
     STORAGE_BACKEND: str = "local"
@@ -24,8 +29,25 @@ class Settings(BaseSettings):
     # CORS
     FRONTEND_URL: str = "http://localhost:5173"
 
-    # Environment
+    # Legacy alias kept for compatibility
     ENVIRONMENT: str = "development"
+
+    @model_validator(mode="after")
+    def require_secret_key(self) -> "Settings":
+        if not self.SECRET_KEY:
+            if self.ENV == "dev":
+                # Use an insecure fallback so dev/test works without .env
+                object.__setattr__(
+                    self,
+                    "SECRET_KEY",
+                    "dev-only-insecure-secret-key-do-not-use-in-prod-32chars",
+                )
+            else:
+                raise ValueError(
+                    "SECRET_KEY must be set when ENV != 'dev'. "
+                    "Set the SECRET_KEY environment variable."
+                )
+        return self
 
     class Config:
         env_file = ".env"

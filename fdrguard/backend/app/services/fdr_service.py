@@ -1,9 +1,11 @@
 """
 FDR business logic service.
 Enforces workflow rules and status transitions.
+
+Status values and transitions are derived from docs/API_CONTRACT.md.
 """
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 from sqlalchemy.orm import Session
 from ..models.fdr import FDRRecord, FDRStatus
@@ -11,32 +13,52 @@ from ..models.audit import StatusHistory, AuditEvent
 from ..models.user import User, UserRole
 from fastapi import HTTPException, status
 
-# Permitted status transitions
-ALLOWED_TRANSITIONS = {
+# ─────────────────────────────────────────────────────────────────────────────
+# Allowed status transitions — rebuilt from API_CONTRACT.md
+# ─────────────────────────────────────────────────────────────────────────────
+ALLOWED_TRANSITIONS: dict[FDRStatus, set[FDRStatus]] = {
     FDRStatus.DRAFT: {FDRStatus.SUBMITTED},
-    FDRStatus.SUBMITTED: {FDRStatus.UNDER_REVIEW},
-    FDRStatus.UNDER_REVIEW: {FDRStatus.VERIFIED, FDRStatus.RETURNED, FDRStatus.REJECTED},
+    FDRStatus.SUBMITTED: {FDRStatus.UNDER_REVIEW, FDRStatus.REJECTED},
+    FDRStatus.UNDER_REVIEW: {
+        FDRStatus.VERIFIED,
+        FDRStatus.RETURNED,
+        FDRStatus.REJECTED,
+    },
     FDRStatus.RETURNED: {FDRStatus.SUBMITTED},
-    FDRStatus.VERIFIED: set(),
-    FDRStatus.REJECTED: set(),
+    FDRStatus.VERIFIED: {FDRStatus.ACTIVE, FDRStatus.REJECTED},
+    FDRStatus.ACTIVE: {FDRStatus.MATURING, FDRStatus.RELEASE_IN_PROGRESS, FDRStatus.RENEWED},
+    FDRStatus.MATURING: {FDRStatus.RELEASE_IN_PROGRESS, FDRStatus.RENEWED},
+    FDRStatus.RELEASE_IN_PROGRESS: {FDRStatus.RELEASED, FDRStatus.ACTIVE},
+    FDRStatus.RENEWED: {FDRStatus.ACTIVE},
+    FDRStatus.REJECTED: {FDRStatus.SUBMITTED},  # college can re-submit after rejection
+    FDRStatus.RELEASED: set(),
+    FDRStatus.WITHDRAWN: set(),
 }
 
 # Transitions that require a remark
 REMARK_REQUIRED = {FDRStatus.RETURNED, FDRStatus.REJECTED}
 
-# Transitions only admins can make
+# Transitions only admin-level roles can make
+from ..core.deps import ADMIN_ROLES
+
 ADMIN_ONLY_TRANSITIONS = {
     FDRStatus.UNDER_REVIEW,
     FDRStatus.VERIFIED,
     FDRStatus.RETURNED,
     FDRStatus.REJECTED,
+    FDRStatus.ACTIVE,
+    FDRStatus.MATURING,
+    FDRStatus.RELEASE_IN_PROGRESS,
+    FDRStatus.RELEASED,
+    FDRStatus.RENEWED,
+    FDRStatus.WITHDRAWN,
 }
 
 
 def generate_application_id(db: Session) -> str:
     """Generate a unique application reference ID."""
     import random, string
-    year = datetime.utcnow().year
+    year = datetime.now(timezone.utc).year
     while True:
         suffix = "".join(random.choices(string.ascii_uppercase + string.digits, k=8))
         app_id = f"FDR-{year}-{suffix}"
@@ -64,7 +86,7 @@ def transition_status(
         )
 
     # Check role permissions
-    if new_status in ADMIN_ONLY_TRANSITIONS and actor.role != UserRole.ADMIN:
+    if new_status in ADMIN_ONLY_TRANSITIONS and actor.role not in ADMIN_ROLES:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only administrators can perform this status transition.",
@@ -80,7 +102,7 @@ def transition_status(
     # Apply transition
     record.status = new_status
     if new_status == FDRStatus.SUBMITTED:
-        record.submitted_at = datetime.utcnow()
+        record.submitted_at = datetime.now(timezone.utc)
     if remark:
         record.admin_remark = remark.strip()
 

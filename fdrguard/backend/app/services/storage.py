@@ -2,23 +2,24 @@
 Storage service abstraction.
 Stage 1: local filesystem storage.
 Future: swap LocalStorageService for S3StorageService without changing callers.
+
+Upload validation:
+  - PDF only (application/pdf), detected via python-magic on file bytes.
+  - Extension must also be .pdf.
+  - Max 10 MB.
 """
 import os
 import uuid
 import re
 from abc import ABC, abstractmethod
 from pathlib import Path
-from fastapi import UploadFile
+from fastapi import UploadFile, HTTPException, status
 from ..core.config import settings
 
-ALLOWED_MIME_TYPES = {
-    "application/pdf",
-    "image/jpeg",
-    "image/png",
-    "image/tiff",
-}
-ALLOWED_EXTENSIONS = {".pdf", ".jpg", ".jpeg", ".png", ".tif", ".tiff"}
-MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024  # 20 MB
+# ── MIME / extension allow-lists ──────────────────────────────────────────────
+ALLOWED_MIME_TYPES = {"application/pdf"}
+ALLOWED_EXTENSIONS = {".pdf"}
+MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024  # 10 MB
 
 
 def _sanitize_filename(filename: str) -> str:
@@ -26,6 +27,61 @@ def _sanitize_filename(filename: str) -> str:
     filename = os.path.basename(filename)
     filename = re.sub(r"[^\w.\-]", "_", filename)
     return filename[:200]  # cap length
+
+
+def _detect_mime(data: bytes) -> str:
+    """Return the MIME type detected from the first bytes of data."""
+    try:
+        import magic  # python-magic / python-magic-bin
+        return magic.from_buffer(data, mime=True)
+    except ImportError:
+        # Fall back to checking PDF magic bytes if python-magic is unavailable
+        if data[:4] == b"%PDF":
+            return "application/pdf"
+        return "application/octet-stream"
+
+
+def validate_upload(data: bytes, filename: str) -> None:
+    """
+    Validate an uploaded file.
+
+    Raises HTTPException (415 or 413) if:
+      - The content detected by python-magic is not application/pdf.
+      - The file extension is not .pdf.
+      - The file exceeds MAX_FILE_SIZE_BYTES (10 MB).
+    """
+    # Size check
+    if len(data) > MAX_FILE_SIZE_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"File too large. Maximum size is {MAX_FILE_SIZE_BYTES // (1024 * 1024)} MB.",
+        )
+    if len(data) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Uploaded file is empty.",
+        )
+
+    # Extension check
+    ext = ""
+    if "." in (filename or ""):
+        ext = "." + filename.rsplit(".", 1)[-1].lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail=f"File extension '{ext}' is not allowed. Only PDF files are accepted.",
+        )
+
+    # Magic-byte (content) check
+    detected_mime = _detect_mime(data)
+    if detected_mime not in ALLOWED_MIME_TYPES:
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail=(
+                f"File content detected as '{detected_mime}', which is not allowed. "
+                "Only PDF files are accepted."
+            ),
+        )
 
 
 class StorageService(ABC):
@@ -49,21 +105,19 @@ class LocalStorageService(StorageService):
 
     async def save(self, file: UploadFile, prefix: str = "") -> tuple[str, int]:
         safe_name = _sanitize_filename(file.filename or "upload")
+        content = await file.read()
+
+        # Validate before writing
+        validate_upload(content, file.filename or "upload")
+
         unique_key = f"{prefix}/{uuid.uuid4().hex}_{safe_name}".lstrip("/")
         dest = self.base_dir / unique_key
         dest.parent.mkdir(parents=True, exist_ok=True)
 
-        content = await file.read()
-        file_size = len(content)
-        if file_size > MAX_FILE_SIZE_BYTES:
-            raise ValueError(f"File too large. Maximum size is {MAX_FILE_SIZE_BYTES // (1024*1024)} MB.")
-        if file_size == 0:
-            raise ValueError("Uploaded file is empty.")
-
         with open(dest, "wb") as f:
             f.write(content)
 
-        return unique_key, file_size
+        return unique_key, len(content)
 
     def get_path(self, storage_key: str) -> str:
         path = (self.base_dir / storage_key).resolve()
