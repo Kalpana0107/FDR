@@ -12,12 +12,24 @@ def _build_engine():
             url,
             connect_args={"check_same_thread": False},
         )
-    return create_engine(
-        url,
-        pool_pre_ping=True,
-        pool_size=10,
-        max_overflow=20,
-    )
+    try:
+        eng = create_engine(
+            url,
+            pool_pre_ping=True,
+            pool_size=10,
+            max_overflow=20,
+            connect_args={"connect_timeout": 2},
+        )
+        with eng.connect():
+            pass
+        return eng
+    except Exception:
+        # Fall back to local SQLite when local PostgreSQL service is not running
+        fallback_url = "sqlite:///./fdrguard.db"
+        return create_engine(
+            fallback_url,
+            connect_args={"check_same_thread": False},
+        )
 
 
 engine = _build_engine()

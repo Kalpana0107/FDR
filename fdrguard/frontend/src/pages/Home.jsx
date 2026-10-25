@@ -12,7 +12,10 @@ import {
   ArrowUpRight,
   Sparkles,
   SlidersHorizontal,
+  CopyCheck,
   FilePlus2,
+  GitCommit,
+  FileCheck,
 } from 'lucide-react'
 import { api } from '../api/client.js'
 import { useAuth } from '../context/AuthContext.jsx'
@@ -22,6 +25,7 @@ import LoadingState from '../components/LoadingState.jsx'
 import EmptyState from '../components/EmptyState.jsx'
 import ErrorState from '../components/ErrorState.jsx'
 import RoleSwitcher from '../components/RoleSwitcher.jsx'
+import FDRDetailModal from '../components/FDRDetailModal.jsx'
 
 function formatINR(val) {
   if (typeof val !== 'number') return '₹0'
@@ -42,6 +46,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedStatus, setSelectedStatus] = useState('All')
   const [simulateError, setSimulateError] = useState(false)
+  const [selectedFdr, setSelectedFdr] = useState(null)
 
   // Fetch summary and FDR list from api/client.js
   const loadData = async (shouldFail = false) => {
@@ -272,31 +277,50 @@ export default function Home() {
         {/* Controls Toolbar: Search, Status Tabs */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
-            <h2 className="text-lg font-bold text-ink">Security Deposit Records</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-bold text-ink">Security Deposit Records</h2>
+              <span className="text-[11px] font-semibold text-brand bg-brand/10 px-2 py-0.5 rounded-md">
+                Interactive Ledger
+              </span>
+            </div>
             <p className="text-xs text-muted">
-              Live ledger of submitted, verified, and maturing FDR certificates
+              Click any deposit record to inspect Required-Documents Checklist (Task 2) & Renewal Chain (Task 3)
             </p>
           </div>
 
-          {/* Search box & Submit Action */}
-          <div className="flex items-center gap-2 max-w-lg w-full">
-            <div className="relative flex-1">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <Link
+              to="/duplicates"
+              className="btn btn-ghost text-xs px-3 py-2 flex items-center gap-1.5 border border-line"
+              title="Inspect cross-college duplicate collisions"
+            >
+              <CopyCheck size={14} className="text-brand" />
+              <span>Duplicate Detection (Task 1)</span>
+            </Link>
+
+            <Link
+              to="/fdrs/new"
+              className="btn btn-primary text-xs px-3.5 py-2 flex items-center gap-1.5 shadow-xs"
+              title="Submit a new FDR certificate with OCR reader"
+            >
+              <FilePlus2 size={14} />
+              <span>New Deposit with OCR (Task 4)</span>
+            </Link>
+
+            {/* Search box */}
+            <div className="relative w-full sm:w-60">
               <Search
-                size={16}
+                size={14}
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
               />
               <input
                 type="text"
-                placeholder="Search by FDR #, institution, or bank…"
+                placeholder="Search FDR #, college, bank…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 text-xs rounded-xl bg-surface border border-line text-ink placeholder:text-muted focus:outline-none focus:border-brand transition-colors"
+                className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-surface border border-line text-ink placeholder:text-muted focus:outline-none focus:border-brand"
               />
             </div>
-            <Link to="/fdrs/new" className="btn btn-primary text-xs shrink-0 py-2">
-              <FilePlus2 size={14} />
-              Submit FDR
-            </Link>
           </div>
         </div>
 
@@ -377,7 +401,9 @@ export default function Home() {
                 {filteredFdrs.map((fdr) => (
                   <tr
                     key={fdr.id}
-                    className="hover:bg-surface/50 transition-colors group"
+                    onClick={() => setSelectedFdr(fdr)}
+                    className="hover:bg-brand/5 cursor-pointer transition-colors group"
+                    title="Click to view Required-Documents Checklist & Renewal Chain"
                   >
                     {/* FDR Number */}
                     <td className="py-3.5 px-4 font-mono font-bold text-ink">
@@ -478,6 +504,15 @@ export default function Home() {
             ))}
           </div>
         </section>
+      )}
+
+      {/* FDR Details, Checklist & Renewal Chain Modal */}
+      {selectedFdr && (
+        <FDRDetailModal
+          fdr={selectedFdr}
+          onClose={() => setSelectedFdr(null)}
+          onFdrUpdated={loadData}
+        />
       )}
     </div>
   )

@@ -274,4 +274,8 @@ def _get_status_path(target: FDRStatus):
 
 
 if __name__ == "__main__":
-    seed()
+    if "--legacy" in sys.argv:
+        seed()
+    else:
+        from seed_100_records import seed_100_records
+        seed_100_records()

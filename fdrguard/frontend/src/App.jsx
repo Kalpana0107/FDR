@@ -5,6 +5,8 @@ import Home from './pages/Home.jsx'
 import NewFdr from './pages/NewFdr.jsx'
 import FdrRecord from './pages/FdrRecord.jsx'
 import Releases from './pages/Releases.jsx'
+import Duplicates from './pages/Duplicates.jsx'
+import NewFDR from './pages/NewFDR.jsx'
 
 export default function App() {
   return (
@@ -15,6 +17,7 @@ export default function App() {
         <Route path="/fdrs/new" element={<NewFdr />} />
         <Route path="/fdrs/:id" element={<FdrRecord />} />
         <Route path="/releases" element={<Releases />} />
+        <Route path="/duplicates" element={<Duplicates />} />
         {/* Fallback to Home shell for nested exploratory routes */}
         <Route path="*" element={<Home />} />
       </Routes>

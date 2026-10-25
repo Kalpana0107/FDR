@@ -2,8 +2,9 @@
 FDR records API — college user endpoints.
 """
 import math
+import hashlib
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Optional, List, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, Query, status, UploadFile, File, Form
 from sqlalchemy import or_, func
 from sqlalchemy.orm import Session, joinedload
@@ -16,14 +17,19 @@ from ..models.document import Document
 from ..models.audit import StatusHistory
 from ..schemas.fdr import (
     FDRCreate, FDRUpdate, FDRListItem, FDRDetail,
-    AdminStatusUpdate, CollegeDashboardStats, AdminDashboardStats, PaginatedFDRList
+    AdminStatusUpdate, CollegeDashboardStats, AdminDashboardStats, PaginatedFDRList,
+    FDRRenewalCreate, OCRScanResponse
 )
 from ..schemas.audit import StatusHistoryOut
 from ..schemas.document import DocumentOut
 from ..services.fdr_service import (
     generate_application_id, transition_status, add_audit_event
 )
-from ..services.storage import storage_service, validate_upload
+from ..services.storage import storage_service, validate_upload, _detect_mime
+from ..services.duplicate_service import detect_all_duplicates, check_fdr_duplicates
+from ..services.checklist_service import evaluate_fdr_checklist
+from ..services.renewal_service import create_fdr_renewal, get_renewal_chain, calculate_active_metrics
+from ..services.ocr_service import extract_fdr_from_pdf
 from ..core.deps import ADMIN_ROLES
 
 router = APIRouter(prefix="/fdr", tags=["FDR Records"])
@@ -36,7 +42,7 @@ def _build_fdr_list_item(record: FDRRecord) -> FDRListItem:
     return item
 
 
-def _build_fdr_detail(record: FDRRecord) -> FDRDetail:
+def _build_fdr_detail(record: FDRRecord, db: Optional[Session] = None) -> FDRDetail:
     detail = FDRDetail.model_validate(record)
     if record.institution:
         detail.institution_name = record.institution.name
@@ -50,6 +56,9 @@ def _build_fdr_detail(record: FDRRecord) -> FDRDetail:
             sh.actor_name = h.actor.full_name
         history_items.append(sh)
     detail.status_history = history_items
+    detail.checklist = evaluate_fdr_checklist(record)
+    if db:
+        detail.renewal_chain = get_renewal_chain(db, record.id)
     return detail
 
 
@@ -377,6 +386,8 @@ async def upload_document(
     raw = await file.read()
     validate_upload(raw, file.filename or "upload")
     await file.seek(0)
+    mime = _detect_mime(raw)
+    file_hash = hashlib.sha256(raw).hexdigest()
 
     storage_key, file_size = await storage_service.save(file, prefix=f"fdr/{fdr_id}")
 
@@ -386,14 +397,35 @@ async def upload_document(
         original_filename=file.filename or "upload",
         storage_key=storage_key,
         file_size=file_size,
-        mime_type=mime or "application/octet-stream",
+        mime_type=mime or "application/pdf",
         document_type=document_type,
+        file_hash=file_hash,
     )
     db.add(doc)
     db.commit()
     db.refresh(doc)
 
-    add_audit_event(db, current_user.id, fdr_id, "document_uploaded", {"filename": file.filename, "document_id": doc.id})
+    # Perform OCR parsing if PDF
+    ocr_meta = None
+    if mime == "application/pdf" or raw[:4] == b"%PDF":
+        try:
+            ocr_meta = extract_fdr_from_pdf(raw)
+        except Exception:
+            ocr_meta = None
+
+    add_audit_event(
+        db,
+        current_user.id,
+        fdr_id,
+        "document_uploaded",
+        {
+            "filename": file.filename,
+            "document_id": doc.id,
+            "file_hash": file_hash,
+            "ocr_extracted": bool(ocr_meta and ocr_meta.get("success")),
+            "ocr_confidence": ocr_meta.get("confidence") if ocr_meta else 0.0,
+        },
+    )
     return DocumentOut.model_validate(doc)
 
 
@@ -459,3 +491,128 @@ def get_status_history(
             sh.actor_name = h.actor.full_name
         result.append(sh)
     return result
+
+
+# ─────────────────────────────────────────────
+# Required documents checklist
+# ─────────────────────────────────────────────
+@router.get("/{fdr_id}/checklist")
+def get_fdr_checklist(
+    fdr_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    record = db.query(FDRRecord).options(joinedload(FDRRecord.documents)).filter(FDRRecord.id == fdr_id).first()
+    if not record:
+        raise HTTPException(status_code=404, detail="FDR record not found")
+    college_roles = {UserRole.COLLEGE_USER, UserRole.COLLEGE}
+    if current_user.role in college_roles and record.institution_id != current_user.institution_id:
+        raise HTTPException(status_code=403, detail="Access denied")
+    return evaluate_fdr_checklist(record)
+
+
+# ─────────────────────────────────────────────
+# Renewal Chain: Create renewal linked to old FDR
+# ─────────────────────────────────────────────
+@router.post("/{fdr_id}/renew", response_model=FDRDetail, status_code=201)
+def renew_fdr_endpoint(
+    fdr_id: int,
+    payload: FDRRenewalCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    record = db.query(FDRRecord).filter(FDRRecord.id == fdr_id).first()
+    if not record:
+        raise HTTPException(status_code=404, detail="FDR record not found")
+    college_roles = {UserRole.COLLEGE_USER, UserRole.COLLEGE}
+    if current_user.role in college_roles and record.institution_id != current_user.institution_id:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    try:
+        new_record = create_fdr_renewal(
+            db=db,
+            old_fdr_id=fdr_id,
+            renewal_payload=payload.model_dump(exclude_unset=True),
+            actor=current_user,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+
+    full_new = db.query(FDRRecord).options(
+        joinedload(FDRRecord.institution),
+        joinedload(FDRRecord.submitted_by_user),
+        joinedload(FDRRecord.documents),
+        joinedload(FDRRecord.status_history).joinedload(StatusHistory.actor),
+    ).filter(FDRRecord.id == new_record.id).first()
+    return _build_fdr_detail(full_new, db=db)
+
+
+# ─────────────────────────────────────────────
+# Renewal Chain: Get full lineage
+# ─────────────────────────────────────────────
+@router.get("/{fdr_id}/renewal-chain")
+def get_fdr_renewal_chain(
+    fdr_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    record = db.query(FDRRecord).filter(FDRRecord.id == fdr_id).first()
+    if not record:
+        raise HTTPException(status_code=404, detail="FDR record not found")
+    college_roles = {UserRole.COLLEGE_USER, UserRole.COLLEGE}
+    if current_user.role in college_roles and record.institution_id != current_user.institution_id:
+        raise HTTPException(status_code=403, detail="Access denied")
+    return get_renewal_chain(db, fdr_id)
+
+
+# ─────────────────────────────────────────────
+# Duplicate Detection for single FDR
+# ─────────────────────────────────────────────
+@router.get("/{fdr_id}/duplicates")
+def get_fdr_duplicates(
+    fdr_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    record = db.query(FDRRecord).filter(FDRRecord.id == fdr_id).first()
+    if not record:
+        raise HTTPException(status_code=404, detail="FDR record not found")
+    return check_fdr_duplicates(db, record)
+
+
+# ─────────────────────────────────────────────
+# Duplicate Detection: Cross-college & system wide
+# ─────────────────────────────────────────────
+@router.get("/duplicates/all")
+def list_duplicates(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return detect_all_duplicates(db)
+
+
+# ─────────────────────────────────────────────
+# OCR: Read FDR number, bank, amount, dates from PDF
+# ─────────────────────────────────────────────
+@router.post("/ocr/scan", response_model=OCRScanResponse)
+async def ocr_scan_pdf(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+):
+    raw = await file.read()
+    validate_upload(raw, file.filename or "fdr_certificate.pdf")
+    res = extract_fdr_from_pdf(raw)
+    return OCRScanResponse(**res)
+
+
+# ─────────────────────────────────────────────
+# Dashboard Summary with renewals counted once
+# ─────────────────────────────────────────────
+@router.get("/dashboard/summary")
+def get_dashboard_summary(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    inst_id = current_user.institution_id if current_user.role in {UserRole.COLLEGE_USER, UserRole.COLLEGE} else None
+    return calculate_active_metrics(db, institution_id=inst_id)
+
