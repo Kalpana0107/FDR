@@ -260,6 +260,277 @@ const mockHandlers = {
     return item
   },
 
+  'POST /fdrs/:id/resubmit': (body, params) => {
+    const item = fdrStore.find((f) => f.id === params.id)
+    if (!item) throw new Error('FDR not found')
+    const now = new Date().toISOString()
+
+    if (body.fdr_number) item.fdr_number = body.fdr_number
+    if (body.bank) item.bank = body.bank
+    if (body.branch) item.branch = body.branch
+    if (body.amount) item.amount = Number(body.amount)
+    if (body.maturity_date) item.maturity_date = body.maturity_date
+    if (body.aicte_lien_endorsed !== undefined) {
+      item.aicte_lien_endorsed = Boolean(body.aicte_lien_endorsed)
+    }
+
+    item.status = 'Submitted'
+    item.verification = {
+      state: 'Pending',
+      simulated: true,
+      verified_at: null,
+      verified_by: null,
+      cbs_match: false,
+      bank_ref: null,
+    }
+
+    if (item.bank_comparison) {
+      item.bank_comparison.submitted = {
+        fdr_number: item.fdr_number,
+        amount: item.amount,
+        bank: item.bank,
+        maturity_date: item.maturity_date,
+        lien_marked: item.aicte_lien_endorsed ? 'Yes (AICTE Joint Endorsed)' : 'No',
+      }
+      item.bank_comparison.match_status = 'Pending Verification'
+      item.bank_comparison.discrepancies = []
+    }
+
+    if (body.fileName) {
+      item.documents.push({
+        id: `doc_${Date.now()}`,
+        name: body.fileName,
+        type: 'PDF',
+        size: '1.9 MB',
+        uploaded_at: now,
+      })
+    }
+
+    item.remarks.push({
+      id: `rem_${Date.now()}`,
+      author: body.author || 'College Accountant',
+      role: 'College',
+      text: body.remark || 'Rectified deposit documentation and endorsed AICTE lien. Resubmitted.',
+      timestamp: now,
+    })
+
+    item.history.push({
+      step: item.history.length + 1,
+      action: 'Deposit Rectified & Resubmitted',
+      actor: body.author || 'College Accountant',
+      status: 'Submitted',
+      timestamp: now,
+    })
+
+    item.versions.push({
+      version: item.versions.length + 1,
+      timestamp: now,
+      label: 'Rectified Resubmission',
+      status: 'Submitted',
+      amount: item.amount,
+      notes: body.remark || 'Corrected AICTE lien endorsement and updated certificate.',
+    })
+
+    // Audit chain block
+    const prevBlock = auditStore[auditStore.length - 1]
+    auditStore.push({
+      block_index: auditStore.length,
+      timestamp: now,
+      event_type: 'FDR_RESUBMISSION',
+      actor: item.institution_name,
+      entity_id: item.fdr_number,
+      details: `Rectified submission: INR ${item.amount.toLocaleString('en-IN')}`,
+      prev_hash: prevBlock ? prevBlock.block_hash : '00000000000000000000000000000000',
+      block_hash: Array.from(crypto.getRandomValues(new Uint8Array(16)))
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('') + 'aa12c401',
+      signature: 'SIMULATED_ECDSA:PORTAL_RESUBMIT_KEY',
+      tamper_flag: false,
+    })
+
+    return item
+  },
+
+  'POST /fdrs/:id/renew': (body, params) => {
+    const item = fdrStore.find((f) => f.id === params.id)
+    if (!item) throw new Error('FDR not found')
+    const now = new Date().toISOString()
+
+    // Transition parent to Renewed
+    item.status = 'Renewed'
+    item.history.push({
+      step: item.history.length + 1,
+      action: 'Deposit Tenure Concluded & Renewed',
+      actor: body.author || 'College Principal',
+      status: 'Renewed',
+      timestamp: now,
+    })
+    item.versions.push({
+      version: item.versions.length + 1,
+      timestamp: now,
+      label: 'Renewed into Child Deposit',
+      status: 'Renewed',
+      amount: item.amount,
+      notes: body.remark || 'Deposit rolled over into renewed certificate.',
+    })
+
+    // Create renewed child FDR
+    const newId = `fdr_${String(fdrStore.length + 1).padStart(3, '0')}`
+    const renewedFdr = {
+      id: newId,
+      fdr_number: body.new_fdr_number || `${item.fdr_number}-R1`,
+      institution_id: item.institution_id,
+      institution_name: item.institution_name,
+      bank: item.bank,
+      branch: item.branch,
+      account_number: item.account_number,
+      ifsc_code: item.ifsc_code,
+      amount: Number(body.amount) || item.amount,
+      roi: Number(body.roi) || item.roi || 7.25,
+      tenure_months: Number(body.tenure_months) || 12,
+      start_date: item.maturity_date || now.split('T')[0],
+      maturity_date: body.maturity_date || '2027-10-25',
+      maturity_amount: Number(body.amount ? body.amount * 1.075 : item.maturity_amount || 1600000),
+      status: 'Active',
+      parent_fdr_id: item.id,
+      joint_holder: item.joint_holder || 'Regional Officer, AICTE Western Region',
+      aicte_lien_endorsed: true,
+      verification: {
+        state: 'Verified',
+        simulated: true,
+        verified_at: now,
+        verified_by: 'Bank CBS Renewal Gateway (Simulated)',
+        cbs_match: true,
+        bank_ref: `CBS-REN-${Math.floor(100000 + Math.random() * 900000)}`,
+      },
+      ocr_data: {
+        confidence: 0.99,
+        extracted_fdr_number: body.new_fdr_number || `${item.fdr_number}-R1`,
+        extracted_amount: Number(body.amount) || item.amount,
+        extracted_bank: item.bank,
+        extracted_maturity: body.maturity_date || '2027-10-25',
+        lien_clause_detected: true,
+      },
+      bank_comparison: {
+        submitted: {
+          fdr_number: body.new_fdr_number || `${item.fdr_number}-R1`,
+          amount: Number(body.amount) || item.amount,
+          bank: item.bank,
+          maturity_date: body.maturity_date || '2027-10-25',
+          lien_marked: 'Yes (AICTE Lien Active)',
+        },
+        cbs_live: {
+          fdr_number: body.new_fdr_number || `${item.fdr_number}-R1`,
+          amount: Number(body.amount) || item.amount,
+          bank: `${item.bank} (CBS Verified)`,
+          maturity_date: body.maturity_date || '2027-10-25',
+          lien_marked: 'Yes (Renewed AICTE Lien)',
+          account_status: 'Earmarked in CBS',
+        },
+        match_status: 'Full Match',
+        discrepancies: [],
+      },
+      documents: [
+        {
+          id: `doc_${Date.now()}`,
+          name: body.fileName || `Renewal_Receipt_${item.fdr_number}.pdf`,
+          type: 'PDF',
+          size: '1.7 MB',
+          uploaded_at: now,
+        },
+      ],
+      remarks: [
+        {
+          id: `rem_${Date.now()}`,
+          author: body.author || 'College Accountant',
+          role: 'College',
+          text: body.remark || `Renewal deposit rolled over from parent ${item.fdr_number}.`,
+          timestamp: now,
+        },
+      ],
+      history: [
+        { step: 1, action: `Renewal Created from ${item.fdr_number}`, actor: 'College', status: 'Submitted', timestamp: now },
+        { step: 2, action: 'Auto-verified with Bank CBS Earmarking', actor: 'CBS Gateway (Simulated)', status: 'Active', timestamp: now },
+      ],
+      versions: [
+        { version: 1, timestamp: now, label: 'Renewal Initialized & Verified', status: 'Active', amount: Number(body.amount) || item.amount, notes: `Rolled over from ${item.fdr_number}` },
+      ],
+    }
+
+    fdrStore = [renewedFdr, ...fdrStore]
+
+    // Audit record
+    const prevBlock = auditStore[auditStore.length - 1]
+    auditStore.push({
+      block_index: auditStore.length,
+      timestamp: now,
+      event_type: 'FDR_RENEWAL',
+      actor: item.institution_name,
+      entity_id: renewedFdr.fdr_number,
+      details: `FDR renewal rollover from ${item.fdr_number}: INR ${renewedFdr.amount.toLocaleString('en-IN')}`,
+      prev_hash: prevBlock ? prevBlock.block_hash : '00000000000000000000000000000000',
+      block_hash: Array.from(crypto.getRandomValues(new Uint8Array(16)))
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('') + 'ef7810aa',
+      signature: 'SIMULATED_ECDSA:PORTAL_RENEWAL_KEY',
+      tamper_flag: false,
+    })
+
+    return { original: item, renewed: renewedFdr }
+  },
+
+  'GET /notifications': () => {
+    const list = []
+    fdrStore.forEach((f) => {
+      if (f.status === 'Returned') {
+        list.push({
+          id: `notif_ret_${f.id}`,
+          type: 'warning',
+          title: 'Deposit Returned for Rectification',
+          message: `${f.fdr_number} (${f.bank}) was returned. AICTE Lien clause endorsement missing.`,
+          fdrId: f.id,
+          fdrNumber: f.fdr_number,
+          timestamp: f.history[f.history.length - 1]?.timestamp || new Date().toISOString(),
+          read: false,
+        })
+      } else if (f.status === 'Maturing') {
+        list.push({
+          id: `notif_mat_${f.id}`,
+          type: 'alert',
+          title: 'Deposit Approaching Maturity',
+          message: `${f.fdr_number} matures on ${f.maturity_date}. Action required: Submit Renewal.`,
+          fdrId: f.id,
+          fdrNumber: f.fdr_number,
+          timestamp: f.history[f.history.length - 1]?.timestamp || new Date().toISOString(),
+          read: false,
+        })
+      } else if (f.status === 'Released') {
+        list.push({
+          id: `notif_rel_${f.id}`,
+          type: 'info',
+          title: 'Security Deposit Released',
+          message: `${f.fdr_number} release approved by Dual-Key Approver. QR receipt ready.`,
+          fdrId: f.id,
+          fdrNumber: f.fdr_number,
+          timestamp: f.history[f.history.length - 1]?.timestamp || new Date().toISOString(),
+          read: true,
+        })
+      } else if (f.status === 'Active') {
+        list.push({
+          id: `notif_act_${f.id}`,
+          type: 'success',
+          title: 'Lien Verified Active in CBS',
+          message: `${f.fdr_number} live and earmarked with AICTE Western Region.`,
+          fdrId: f.id,
+          fdrNumber: f.fdr_number,
+          timestamp: f.verification?.verified_at || new Date().toISOString(),
+          read: true,
+        })
+      }
+    })
+    return list
+  },
+
   'GET /dashboard/summary': () => dashboardSummary,
 
   'GET /duplicates': () => duplicateMatches,
@@ -464,4 +735,11 @@ export const api = {
 
   // Receipts
   getReceipt: (hash) => request('GET', `/receipts/${hash}`),
+
+  // Resubmit & Renew
+  resubmitFdr: (id, data) => request('POST', `/fdrs/${id}/resubmit`, data),
+  renewFdr: (id, data) => request('POST', `/fdrs/${id}/renew`, data),
+
+  // Notifications
+  getNotifications: () => request('GET', '/notifications'),
 }
