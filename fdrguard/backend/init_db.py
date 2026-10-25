@@ -9,7 +9,19 @@ import os
 sys.path.insert(0, os.path.dirname(__file__))
 
 from app.core.database import engine, Base
-from app.models import User, UserRole, Institution, FDRRecord, FDRStatus, Document, StatusHistory, AuditEvent
+from app.models import (
+    User, UserRole,
+    Institution,
+    FDRRecord, FDRStatus,
+    Document,
+    StatusHistory, AuditEvent,
+    # New models — must be imported so Base.metadata registers their tables
+    AuditLog,
+    BankVerification, BankCheckStatus,
+    FDRVersion,
+    MaturityReminder,
+    ReleaseRequest, ReleaseStatus,
+)
 
 
 def init_db():
