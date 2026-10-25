@@ -26,8 +26,8 @@ export default function Sidebar({ isOpen, onClose }) {
     {
       group: 'Overview',
       items: [
-        { label: 'Dashboard', path: '/', icon: LayoutDashboard },
-        { label: 'Security Deposits', path: '/fdrs', icon: FileText, badge: 'Active' },
+        { label: 'Dashboard', path: '/app', icon: LayoutDashboard },
+        { label: 'Security Deposits', path: '/app/fdrs', icon: FileText, badge: 'Active' },
       ],
     },
     {
@@ -35,25 +35,25 @@ export default function Sidebar({ isOpen, onClose }) {
       items: [
         {
           label: 'Submit New FDR',
-          path: '/fdrs/new',
+          path: '/app/fdrs/new',
           icon: FilePlus2,
           roleOnly: ['College'],
         },
         {
           label: 'Verification Queue',
-          path: '/verify',
+          path: '/app/verify',
           icon: CheckSquare,
           simulated: true,
           badge: 'CBS',
         },
         {
           label: 'Duplicate Detection',
-          path: '/duplicates',
+          path: '/app/duplicates',
           icon: CopyCheck,
         },
         {
           label: 'Release Requests',
-          path: '/releases',
+          path: '/app/releases',
           icon: FileCheck,
           badge: 'Dual-Key',
         },
@@ -64,13 +64,13 @@ export default function Sidebar({ isOpen, onClose }) {
       items: [
         {
           label: 'Tamper-Evident Chain',
-          path: '/audit',
+          path: '/app/audit',
           icon: Link2,
           simulated: true,
         },
         {
           label: 'Public QR Verifier',
-          path: '/verify-receipt',
+          path: '/verify',
           icon: QrCode,
         },
       ],
@@ -78,7 +78,7 @@ export default function Sidebar({ isOpen, onClose }) {
   ]
 
   const isActive = (path) => {
-    if (path === '/') return location.pathname === '/'
+    if (path === '/app') return location.pathname === '/app'
     return location.pathname.startsWith(path)
   }
 
