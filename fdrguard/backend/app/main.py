@@ -1,25 +1,32 @@
-import os
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from .core.config import settings
+from .api.auth import router as auth_router
+from .api.fdr import router as fdr_router
+from .api.institutions import router as institutions_router
 
-app = FastAPI(title="FDRGuard API", version="0.1.0")
-
-origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",") if o.strip()]
+app = FastAPI(
+    title="FDR Guard — AICTE Security Deposit Portal",
+    description="API for managing Fixed Deposit Receipt (FDR) records submitted to AICTE.",
+    version="1.0.0",
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+    openapi_url="/api/openapi.json",
+)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=[settings.FRONTEND_URL, "http://localhost:5173", "http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+app.include_router(auth_router, prefix="/api")
+app.include_router(fdr_router, prefix="/api")
+app.include_router(institutions_router, prefix="/api")
 
-@app.get("/api/health")
+
+@app.get("/api/health", tags=["Health"])
 def health():
-    return {"status": "ok", "service": "fdrguard-api", "version": app.version}
-
-
-# TODO (feat/api-*): implement the routes in docs/API_CONTRACT.md one at a time.
-# Each response must match the JSON in frontend/src/mocks/*.js exactly.
+    return {"status": "ok", "version": "1.0.0"}
