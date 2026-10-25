@@ -2,60 +2,60 @@ import React from 'react'
 
 const STATUS_STYLES = {
   Verified: {
-    badge: 'bg-emerald-50 text-emerald-700 border-emerald-200/60',
-    dot: 'bg-emerald-500',
+    badge: 'bg-emerald-50 text-emerald-800 border-emerald-200/80',
+    dot: 'bg-emerald-600 animate-pulse',
   },
   Active: {
-    badge: 'bg-emerald-50 text-emerald-700 border-emerald-200/60',
-    dot: 'bg-emerald-500',
+    badge: 'bg-emerald-50 text-emerald-800 border-emerald-200/80',
+    dot: 'bg-emerald-600 animate-pulse',
   },
   Pending: {
-    badge: 'bg-amber-50 text-amber-700 border-amber-200/60',
-    dot: 'bg-amber-500',
+    badge: 'bg-amber-50 text-amber-800 border-amber-200/80',
+    dot: 'bg-amber-600',
   },
   'Verification Pending': {
-    badge: 'bg-amber-50 text-amber-700 border-amber-200/60',
-    dot: 'bg-amber-500',
+    badge: 'bg-amber-50 text-amber-800 border-amber-200/80',
+    dot: 'bg-amber-600',
   },
   Maturing: {
-    badge: 'bg-amber-50 text-amber-700 border-amber-200/60',
-    dot: 'bg-amber-500',
+    badge: 'bg-amber-50 text-amber-800 border-amber-200/80',
+    dot: 'bg-amber-600',
   },
   Returned: {
-    badge: 'bg-amber-50 text-amber-700 border-amber-200/60',
-    dot: 'bg-amber-500',
+    badge: 'bg-amber-50 text-amber-800 border-amber-200/80',
+    dot: 'bg-amber-600',
   },
   Rejected: {
-    badge: 'bg-rose-50 text-rose-700 border-rose-200/60',
-    dot: 'bg-rose-500',
+    badge: 'bg-rose-50 text-rose-800 border-rose-200/80',
+    dot: 'bg-rose-600',
   },
   Failed: {
-    badge: 'bg-rose-50 text-rose-700 border-rose-200/60',
-    dot: 'bg-rose-500',
+    badge: 'bg-rose-50 text-rose-800 border-rose-200/80',
+    dot: 'bg-rose-600',
   },
   'Under Review': {
-    badge: 'bg-blue-50 text-blue-700 border-blue-200/60',
-    dot: 'bg-blue-500',
+    badge: 'bg-blue-50 text-blue-800 border-blue-200/80',
+    dot: 'bg-blue-600',
   },
   Submitted: {
-    badge: 'bg-blue-50 text-blue-700 border-blue-200/60',
-    dot: 'bg-blue-500',
+    badge: 'bg-blue-50 text-blue-800 border-blue-200/80',
+    dot: 'bg-blue-600',
   },
   Renewed: {
-    badge: 'bg-indigo-50 text-indigo-700 border-indigo-200/60',
-    dot: 'bg-indigo-500',
+    badge: 'bg-emerald-50 text-emerald-800 border-emerald-200/80',
+    dot: 'bg-emerald-600 animate-pulse',
   },
   Released: {
-    badge: 'bg-slate-50 text-slate-700 border-slate-200/60',
-    dot: 'bg-slate-400',
+    badge: 'bg-zinc-100 text-zinc-700 border-zinc-200',
+    dot: 'bg-zinc-400',
   },
   Withdrawn: {
-    badge: 'bg-slate-50 text-slate-700 border-slate-200/60',
-    dot: 'bg-slate-400',
+    badge: 'bg-zinc-100 text-zinc-700 border-zinc-200',
+    dot: 'bg-zinc-400',
   },
   'Release in Progress': {
-    badge: 'bg-blue-50 text-blue-700 border-blue-200/60',
-    dot: 'bg-blue-500',
+    badge: 'bg-blue-50 text-blue-800 border-blue-200/80',
+    dot: 'bg-blue-600',
   },
 }
 
