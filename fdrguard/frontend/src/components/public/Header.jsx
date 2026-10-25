@@ -12,7 +12,7 @@ export default function Header() {
   const navLinks = [
     { label: 'Features', href: '#features' },
     { label: 'How it works', href: '#how-it-works' },
-    { label: 'Who it's for', href: '#who-for' },
+    { label: 'Who its for', href: '#who-for' },
     { label: 'FAQ', href: '#faq' },
   ];
 
