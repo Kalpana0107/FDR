@@ -74,8 +74,15 @@ def transition_status(
     new_status: FDRStatus,
     actor: User,
     remark: Optional[str] = None,
+    privileged_roles: Optional[set] = None,
 ) -> FDRRecord:
-    """Apply a validated status transition and record history."""
+    """Apply a validated status transition and record history.
+
+    Args:
+        privileged_roles: Additional roles (beyond ADMIN_ROLES) that are permitted
+            to perform ADMIN_ONLY_TRANSITIONS for this specific call site.  Used by
+            bank_verify endpoint so BANK_VERIFIER can drive SUBMITTED→VERIFIED.
+    """
     current_status = record.status
 
     # Check allowed transitions
@@ -87,7 +94,8 @@ def transition_status(
         )
 
     # Check role permissions
-    if new_status in ADMIN_ONLY_TRANSITIONS and actor.role not in ADMIN_ROLES:
+    effective_privileged = (privileged_roles or set()) | ADMIN_ROLES
+    if new_status in ADMIN_ONLY_TRANSITIONS and actor.role not in effective_privileged:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only administrators can perform this status transition.",

@@ -101,20 +101,25 @@ def verify_bank(
     if result.status == "VERIFIED":
         if record.status == FDRStatus.SUBMITTED:
             transition_status(db, record, FDRStatus.UNDER_REVIEW, current_user,
-                              remark="Bank CBS check initiated (Simulated)")
+                              remark="Bank CBS check initiated (Simulated)",
+                              privileged_roles={UserRole.BANK_VERIFIER})
         transition_status(db, record, FDRStatus.VERIFIED, current_user,
-                          remark="Bank CBS verification passed (Simulated)")
+                          remark="Bank CBS verification passed (Simulated)",
+                          privileged_roles={UserRole.BANK_VERIFIER})
     elif result.status == "FAILED":
         # RETURNED is only valid from UNDER_REVIEW; from SUBMITTED use REJECTED
         if record.status == FDRStatus.SUBMITTED:
             transition_status(db, record, FDRStatus.UNDER_REVIEW, current_user,
-                              remark="Bank CBS check initiated (Simulated)")
+                              remark="Bank CBS check initiated (Simulated)",
+                              privileged_roles={UserRole.BANK_VERIFIER})
         if record.status == FDRStatus.UNDER_REVIEW:
             transition_status(db, record, FDRStatus.RETURNED, current_user,
-                              remark=f"Bank CBS mismatch on: {', '.join(result.discrepancies)} (Simulated)")
+                              remark=f"Bank CBS mismatch on: {', '.join(result.discrepancies)} (Simulated)",
+                              privileged_roles={UserRole.BANK_VERIFIER})
         else:
             transition_status(db, record, FDRStatus.REJECTED, current_user,
-                              remark=f"Bank CBS mismatch on: {', '.join(result.discrepancies)} (Simulated)")
+                              remark=f"Bank CBS mismatch on: {', '.join(result.discrepancies)} (Simulated)",
+                              privileged_roles={UserRole.BANK_VERIFIER})
 
     # Append to hash-chained audit log
     append_audit_log(
