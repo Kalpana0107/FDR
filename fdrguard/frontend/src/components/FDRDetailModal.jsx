@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import StatusBadge from './StatusBadge.jsx'
 import SimulatedChip from './SimulatedChip.jsx'
+import BankCompareModal from './BankCompareModal.jsx'
 import { api } from '../api/client.js'
 
 function formatINR(val) {
@@ -37,6 +38,12 @@ export default function FDRDetailModal({ fdr, onClose, onFdrUpdated }) {
   const [submittingRenewal, setSubmittingRenewal] = useState(false)
   const [renewSuccess, setRenewSuccess] = useState(null)
   const [uploadNotice, setUploadNotice] = useState(null)
+  const [showCompareModal, setShowCompareModal] = useState(false)
+  const [currentRecord, setCurrentRecord] = useState(fdr)
+
+  useEffect(() => {
+    setCurrentRecord(fdr)
+  }, [fdr])
 
   if (!fdr) return null
 
@@ -634,17 +641,38 @@ export default function FDRDetailModal({ fdr, onClose, onFdrUpdated }) {
         {/* Modal Footer */}
         <div className="p-4 border-t border-line bg-surface/30 flex items-center justify-between text-xs">
           <div className="text-muted font-mono text-[11px]">
-            Record ID: {fdr.id}
+            Record ID: {currentRecord.id}
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="btn btn-ghost text-xs px-4 py-1.5"
-          >
-            Close
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowCompareModal(true)}
+              className="btn btn-primary text-xs px-3.5 py-1.5 shadow-xs flex items-center gap-1.5"
+            >
+              <Building2 size={13} />
+              <span>Bank Compare & Verify</span>
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="btn btn-ghost text-xs px-4 py-1.5"
+            >
+              Close
+            </button>
+          </div>
         </div>
       </div>
+
+      {showCompareModal && (
+        <BankCompareModal
+          fdr={currentRecord}
+          onClose={() => setShowCompareModal(false)}
+          onFdrUpdated={(updated) => {
+            setCurrentRecord(updated)
+            if (onFdrUpdated) onFdrUpdated(updated)
+          }}
+        />
+      )}
     </div>
   )
 }

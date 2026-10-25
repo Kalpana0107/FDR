@@ -2,6 +2,7 @@ import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard,
+  BarChart3,
   FileText,
   FilePlus2,
   CheckSquare,
@@ -26,7 +27,8 @@ export default function Sidebar({ isOpen, onClose }) {
     {
       group: 'Overview',
       items: [
-        { label: 'Dashboard', path: '/', icon: LayoutDashboard },
+        { label: 'Overview & Ledger', path: '/', icon: LayoutDashboard },
+        { label: 'Management Dashboard', path: '/management', icon: BarChart3, badge: 'Executive' },
         { label: 'Security Deposits', path: '/fdrs', icon: FileText, badge: 'Active' },
       ],
     },

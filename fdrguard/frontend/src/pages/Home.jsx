@@ -16,6 +16,9 @@ import {
   FilePlus2,
   GitCommit,
   FileCheck,
+  CheckSquare,
+  BarChart3,
+  Link2,
 } from 'lucide-react'
 import { api } from '../api/client.js'
 import { useAuth } from '../context/AuthContext.jsx'
@@ -290,12 +293,48 @@ export default function Home() {
 
           <div className="flex flex-wrap items-center gap-2.5">
             <Link
+              to="/verify"
+              className="btn btn-ghost text-xs px-3 py-2 flex items-center gap-1.5 border border-line"
+              title="Open officer verification queue and CBS bank comparison"
+            >
+              <CheckSquare size={14} className="text-brand" />
+              <span>Officer Queue (Task 1)</span>
+            </Link>
+
+            <Link
               to="/duplicates"
               className="btn btn-ghost text-xs px-3 py-2 flex items-center gap-1.5 border border-line"
               title="Inspect cross-college duplicate collisions"
             >
               <CopyCheck size={14} className="text-brand" />
-              <span>Duplicate Detection (Task 1)</span>
+              <span>Duplicates Panel (Task 2)</span>
+            </Link>
+
+            <Link
+              to="/management"
+              className="btn btn-ghost text-xs px-3 py-2 flex items-center gap-1.5 border border-line"
+              title="Open executive management dashboard with radar & health score"
+            >
+              <BarChart3 size={14} className="text-brand" />
+              <span>Management (Task 3)</span>
+            </Link>
+
+            <Link
+              to="/releases"
+              className="btn btn-ghost text-xs px-3 py-2 flex items-center gap-1.5 border border-line"
+              title="Open dual-key release approval queue"
+            >
+              <FileCheck size={14} className="text-brand" />
+              <span>Release Approval (Task 4)</span>
+            </Link>
+
+            <Link
+              to="/audit"
+              className="btn btn-ghost text-xs px-3 py-2 flex items-center gap-1.5 border border-line"
+              title="Open cryptographic hash chain audit ledger"
+            >
+              <Link2 size={14} className="text-brand" />
+              <span>Audit Chain (Task 5)</span>
             </Link>
 
             <Link
@@ -304,7 +343,7 @@ export default function Home() {
               title="Submit a new FDR certificate with OCR reader"
             >
               <FilePlus2 size={14} />
-              <span>New Deposit with OCR (Task 4)</span>
+              <span>New Deposit with OCR</span>
             </Link>
 
             {/* Search box */}
