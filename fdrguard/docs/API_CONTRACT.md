@@ -44,6 +44,16 @@ FDR shape:
 
 `POST /api/fdrs/{id}/verify` runs the simulated bank check. If the bank is unreachable it returns `Verification Pending`, never a fake pass.
 
+`POST /api/fdrs/{id}/resubmit` fixes and resubmits a returned FDR back to `Submitted`.
+- body: `{ "fdr_number", "bank", "amount", "maturity_date", "aicte_lien_endorsed", "remark" }`
+
+`POST /api/fdrs/{id}/renew` submits a renewal for an active/maturing FDR.
+- body: `{ "new_fdr_number", "amount", "roi", "tenure_months", "maturity_date", "remark" }`
+
+## Notifications
+`GET /api/notifications` returns real-time alert items for maturities, returns, and verification updates.
+
+
 ## Releases (two-person rule)
 - `POST /api/releases` College requests release
 - `POST /api/releases/{id}/review` reviewer

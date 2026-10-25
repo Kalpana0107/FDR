@@ -1,31 +1,75 @@
-// The ONLY way to render an FDR / verification status in the UI.
-// Class names are written out in full so Tailwind can detect them.
-const STYLES = {
-  Verified: 'bg-ok-50 text-ok-700 ring-ok-200',
-  Active: 'bg-ok-50 text-ok-700 ring-ok-200',
-  Pending: 'bg-warn-50 text-warn-700 ring-warn-200',
-  'Verification Pending': 'bg-warn-50 text-warn-700 ring-warn-200',
-  Maturing: 'bg-warn-50 text-warn-700 ring-warn-200',
-  Returned: 'bg-ret-50 text-ret-700 ring-ret-200',
-  Rejected: 'bg-bad-50 text-bad-700 ring-bad-200',
-  Failed: 'bg-bad-50 text-bad-700 ring-bad-200',
-  'Under Review': 'bg-info-50 text-info-700 ring-info-200',
-  Submitted: 'bg-info-50 text-info-700 ring-info-200',
-  Renewed: 'bg-renew-50 text-renew-700 ring-renew-200',
-  Released: 'bg-done-50 text-done-700 ring-done-200',
-  Withdrawn: 'bg-done-50 text-done-700 ring-done-200',
-  'Release in Progress': 'bg-info-50 text-info-700 ring-info-200',
+import React from 'react'
+
+const STATUS_STYLES = {
+  Verified: {
+    badge: 'bg-emerald-50 text-emerald-800 border-emerald-200/80',
+    dot: 'bg-emerald-600 animate-pulse',
+  },
+  Active: {
+    badge: 'bg-emerald-50 text-emerald-800 border-emerald-200/80',
+    dot: 'bg-emerald-600 animate-pulse',
+  },
+  Pending: {
+    badge: 'bg-amber-50 text-amber-800 border-amber-200/80',
+    dot: 'bg-amber-600',
+  },
+  'Verification Pending': {
+    badge: 'bg-amber-50 text-amber-800 border-amber-200/80',
+    dot: 'bg-amber-600',
+  },
+  Maturing: {
+    badge: 'bg-amber-50 text-amber-800 border-amber-200/80',
+    dot: 'bg-amber-600',
+  },
+  Returned: {
+    badge: 'bg-amber-50 text-amber-800 border-amber-200/80',
+    dot: 'bg-amber-600',
+  },
+  Rejected: {
+    badge: 'bg-rose-50 text-rose-800 border-rose-200/80',
+    dot: 'bg-rose-600',
+  },
+  Failed: {
+    badge: 'bg-rose-50 text-rose-800 border-rose-200/80',
+    dot: 'bg-rose-600',
+  },
+  'Under Review': {
+    badge: 'bg-blue-50 text-blue-800 border-blue-200/80',
+    dot: 'bg-blue-600',
+  },
+  Submitted: {
+    badge: 'bg-blue-50 text-blue-800 border-blue-200/80',
+    dot: 'bg-blue-600',
+  },
+  Renewed: {
+    badge: 'bg-emerald-50 text-emerald-800 border-emerald-200/80',
+    dot: 'bg-emerald-600 animate-pulse',
+  },
+  Released: {
+    badge: 'bg-zinc-100 text-zinc-700 border-zinc-200',
+    dot: 'bg-zinc-400',
+  },
+  Withdrawn: {
+    badge: 'bg-zinc-100 text-zinc-700 border-zinc-200',
+    dot: 'bg-zinc-400',
+  },
+  'Release in Progress': {
+    badge: 'bg-blue-50 text-blue-800 border-blue-200/80',
+    dot: 'bg-blue-600',
+  },
 }
 
-export const ALL_STATUSES = Object.keys(STYLES)
+export const ALL_STATUSES = Object.keys(STATUS_STYLES)
 
 export default function StatusBadge({ status }) {
-  const style = STYLES[status] ?? STYLES.Released
+  const config = STATUS_STYLES[status] ?? STATUS_STYLES.Released
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${style}`}
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium border ${config.badge}`}
     >
+      <span className={`h-1.5 w-1.5 rounded-full ${config.dot} shrink-0`} />
       {status}
     </span>
   )
 }
+

@@ -407,7 +407,13 @@ export default function Home() {
                   >
                     {/* FDR Number */}
                     <td className="py-3.5 px-4 font-mono font-bold text-ink">
-                      {fdr.fdr_number}
+                      <Link
+                        to={`/fdrs/${fdr.id}`}
+                        className="hover:text-brand hover:underline flex items-center gap-1 group-hover:text-brand transition-colors"
+                      >
+                        {fdr.fdr_number}
+                        <ArrowUpRight size={13} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </Link>
                     </td>
 
                     {/* Institution */}
