@@ -293,25 +293,27 @@ export default function FdrRecord() {
   }
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-6 max-w-5xl mx-auto text-slate-800">
       {/* Breadcrumb & Navigation */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <Link to="/" className="text-xs text-muted hover:text-brand font-medium">
+            <Link to="/" className="text-xs text-slate-400 hover:text-indigo-600 font-medium transition-colors">
               Dashboard
             </Link>
-            <span className="text-muted text-xs">/</span>
-            <span className="text-xs text-muted font-mono">{fdr.institution_id}</span>
-            <span className="text-muted text-xs">/</span>
-            <span className="text-xs text-ink font-semibold font-mono">{fdr.fdr_number}</span>
+            <span className="text-slate-300 text-xs">/</span>
+            <span className="text-xs text-slate-400 font-mono">{fdr.institution_id}</span>
+            <span className="text-slate-300 text-xs">/</span>
+            <span className="text-xs text-slate-700 font-semibold font-mono tracking-tight">{fdr.fdr_number}</span>
           </div>
           <div className="flex items-center gap-3 mt-1.5 flex-wrap">
-            <h1 className="text-xl sm:text-2xl font-extrabold text-ink font-mono tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 font-mono tracking-tight font-heading">
               {fdr.fdr_number}
             </h1>
             <StatusBadge status={fdr.status} />
-            <SimulatedChip text="Simulated Bank Gateway" />
+            <span className="rounded bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 text-xs font-medium">
+              Simulated Bank Gateway
+            </span>
           </div>
         </div>
 
@@ -322,7 +324,7 @@ export default function FdrRecord() {
             <button
               type="button"
               onClick={() => setShowFixModal(true)}
-              className="btn btn-primary text-xs bg-ret-700 hover:opacity-90 shadow-sm"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs rounded-lg shadow-xs px-3.5 py-2 transition-all inline-flex items-center gap-1.5 cursor-pointer"
             >
               <RotateCcw size={14} />
               Fix & Resubmit Deposit
@@ -334,7 +336,7 @@ export default function FdrRecord() {
             <button
               type="button"
               onClick={() => setShowRenewModal(true)}
-              className="btn btn-ghost text-xs border-renew-200 text-renew-700 bg-renew-50/50 hover:bg-renew-50"
+              className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium rounded-lg px-3 py-1.5 transition-all inline-flex items-center gap-1.5 cursor-pointer"
             >
               <RotateCcw size={14} />
               Submit Renewal
@@ -346,7 +348,7 @@ export default function FdrRecord() {
             <button
               type="button"
               onClick={() => setShowReleaseModal(true)}
-              className="btn btn-ghost text-xs"
+              className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium rounded-lg px-3 py-1.5 transition-all inline-flex items-center gap-1.5 cursor-pointer"
             >
               <FileCheck2 size={14} />
               Request Release
@@ -358,22 +360,22 @@ export default function FdrRecord() {
             <button
               type="button"
               onClick={() => setShowQrModal(true)}
-              className="btn btn-primary text-xs"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs rounded-lg shadow-xs px-3.5 py-2 transition-all inline-flex items-center gap-1.5 cursor-pointer"
             >
               <ShieldCheck size={14} />
               View QR Receipt
             </button>
           )}
 
-          {/* Autonomous Sandbox Helpers */}
+          {/* Autonomous Sandbox Developer Helpers */}
           <button
             type="button"
             disabled={actionLoading}
             onClick={handleVerifyBank}
             title="Execute simulated CBS live check"
-            className="btn btn-ghost text-xs"
+            className="bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 text-xs rounded-md px-2.5 py-1 transition-all inline-flex items-center gap-1.5 cursor-pointer"
           >
-            <Sparkles size={13} className="text-brand" />
+            <Sparkles size={13} className="text-indigo-600" />
             Simulate CBS Verify
           </button>
 
@@ -383,9 +385,9 @@ export default function FdrRecord() {
               disabled={actionLoading}
               onClick={handleSimulateReturn}
               title="Test the Fix-and-Resubmit workflow"
-              className="btn btn-ghost text-xs text-bad-700 border-bad-200 hover:bg-bad-50"
+              className="bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 text-xs rounded-md px-2.5 py-1 transition-all inline-flex items-center gap-1.5 cursor-pointer"
             >
-              <AlertTriangle size={13} />
+              <AlertTriangle size={13} className="text-amber-600" />
               Simulate Return
             </button>
           )}
@@ -394,28 +396,28 @@ export default function FdrRecord() {
 
       {/* Returned Status Banner with Fix prompt */}
       {fdr.status === 'Returned' && (
-        <div className="card bg-ret-50/70 border-ret-200 p-4 space-y-2">
+        <div className="bg-amber-50/70 border border-amber-200/80 rounded-xl p-4 space-y-2">
           <div className="flex items-start gap-3">
-            <div className="p-2 rounded-xl bg-ret-700 text-white shrink-0 mt-0.5">
-              <AlertTriangle size={18} />
+            <div className="p-2 rounded-lg bg-amber-500 text-white shrink-0 mt-0.5 shadow-2xs">
+              <AlertTriangle size={16} />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <h3 className="font-bold text-sm text-ret-700">
+                <h3 className="font-semibold text-xs text-amber-900">
                   Deposit Returned: Action Required by College
                 </h3>
-                <span className="text-[11px] font-mono text-ret-700 font-bold">
+                <span className="text-[11px] font-mono text-amber-700 font-semibold">
                   Status: Returned
                 </span>
               </div>
-              <p className="text-xs text-ink/90 mt-1 leading-relaxed">
+              <p className="text-xs text-amber-800/80 mt-1 leading-relaxed">
                 The deposit certificate was returned during scrutiny due to a missing AICTE Western Region joint lien clause or document illegibility. Please upload the rectified certificate and resubmit.
               </p>
               <div className="pt-2">
                 <button
                   type="button"
                   onClick={() => setShowFixModal(true)}
-                  className="btn btn-primary text-xs bg-ret-700 hover:opacity-90"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs rounded-lg shadow-xs px-3.5 py-2 transition-all inline-flex items-center gap-1.5 cursor-pointer"
                 >
                   <RotateCcw size={14} />
                   Open Fix & Resubmit Form
@@ -428,28 +430,28 @@ export default function FdrRecord() {
 
       {/* Maturing Status Banner with Renewal prompt */}
       {fdr.status === 'Maturing' && (
-        <div className="card bg-warn-50/70 border-warn-200 p-4">
+        <div className="bg-amber-50/50 border border-amber-200/60 rounded-xl p-4">
           <div className="flex items-start gap-3">
-            <div className="p-2 rounded-xl bg-warn-700 text-white shrink-0 mt-0.5">
-              <Clock size={18} />
+            <div className="p-2 rounded-lg bg-amber-500 text-white shrink-0 mt-0.5 shadow-2xs">
+              <Clock size={16} />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <h3 className="font-bold text-sm text-warn-700">
+                <h3 className="font-semibold text-xs text-amber-900">
                   Deposit Maturing Soon: Renewal Action Recommended
                 </h3>
-                <span className="text-[11px] font-mono text-warn-700 font-bold">
+                <span className="text-[11px] font-mono text-amber-700 font-semibold">
                   Due: {fdr.maturity_date}
                 </span>
               </div>
-              <p className="text-xs text-ink/90 mt-1 leading-relaxed">
+              <p className="text-xs text-amber-800/80 mt-1 leading-relaxed">
                 This security deposit is approaching its maturity date. To maintain statutory AICTE accreditation standing, submit a rollover renewal.
               </p>
               <div className="pt-2">
                 <button
                   type="button"
                   onClick={() => setShowRenewModal(true)}
-                  className="btn btn-ghost text-xs border-warn-200 text-warn-700 bg-card hover:bg-surface"
+                  className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium rounded-lg px-3 py-1.5 transition-all inline-flex items-center gap-1.5 cursor-pointer"
                 >
                   <RotateCcw size={14} />
                   Submit Deposit Renewal
@@ -460,94 +462,96 @@ export default function FdrRecord() {
         </div>
       )}
 
-      {/* Section 1: Lifecycle Stepper */}
-      <div className="card p-5 space-y-4">
+      {/* Section 1: Lifecycle Stepper as Crisp Horizontal Pipeline */}
+      <div className="bg-white border border-slate-200/80 rounded-xl shadow-xs p-5 sm:p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xs font-bold text-muted uppercase tracking-wider">
-            Deposit Lifecycle Stepper
+          <h2 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            Deposit Lifecycle Pipeline
           </h2>
-          <span className="text-xs text-muted font-mono">Current: {fdr.status}</span>
+          <span className="text-xs text-slate-400 font-mono">
+            Current: <span className="font-semibold text-slate-800">{fdr.status}</span>
+          </span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {steps.map((st, idx) => {
-            const state = getStepState(st.key, idx)
-            const isCompleted = state === 'completed'
-            const isReturned = state === 'returned'
+        {/* Horizontal Line Pipeline with Circular Step Badges */}
+        <div className="relative pt-2 pb-1">
+          {/* Connecting line */}
+          <div className="absolute top-6 left-8 right-8 h-0.5 bg-slate-200 -z-0" />
 
-            return (
-              <div
-                key={st.key}
-                className={`rounded-xl border p-3 space-y-1.5 transition-colors ${
-                  isReturned
-                    ? 'border-ret-200 bg-ret-50/60'
-                    : isCompleted
-                    ? 'border-ok-200 bg-ok-50/60'
-                    : 'border-line bg-surface/40'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span
-                    className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
+          <div className="relative z-10 flex items-start justify-between">
+            {steps.map((st, idx) => {
+              const state = getStepState(st.key, idx)
+              const isCompleted = state === 'completed'
+              const isReturned = state === 'returned'
+
+              return (
+                <div key={st.key} className="flex flex-col items-center text-center max-w-[120px]">
+                  <div
+                    className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold ring-4 ring-white transition-all shadow-xs ${
                       isReturned
-                        ? 'bg-ret-700 text-white'
+                        ? 'bg-amber-500 text-white'
                         : isCompleted
-                        ? 'bg-ok-700 text-white'
-                        : 'bg-surface border border-line text-muted'
+                        ? 'bg-emerald-500 text-white'
+                        : 'bg-slate-100 text-slate-400 border border-slate-300'
                     }`}
                   >
                     {isReturned ? '!' : isCompleted ? '✓' : idx + 1}
-                  </span>
-                  <span className="text-[10px] font-mono text-muted">Step {idx + 1}</span>
+                  </div>
+                  <div className="mt-2 text-xs font-semibold text-slate-800 leading-tight">
+                    {st.label}
+                  </div>
+                  <div className="text-[10px] text-slate-400 mt-0.5">
+                    {isReturned
+                      ? 'Action Required'
+                      : isCompleted
+                      ? 'Completed'
+                      : 'Pending'}
+                  </div>
                 </div>
-                <div className="font-bold text-xs text-ink">{st.label}</div>
-                <div className="text-[10px] text-muted leading-none">
-                  {isReturned
-                    ? 'Returned to College'
-                    : isCompleted
-                    ? 'Verified & Ingested'
-                    : 'Pending Action'}
-                </div>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
         </div>
 
         {/* Special Status Callout if Renewed or Released */}
         {(fdr.status === 'Renewed' || fdr.status === 'Released') && (
-          <div className="text-xs font-semibold text-brand flex items-center gap-1.5 pt-1">
-            <CheckCircle2 size={14} />
+          <div className="text-xs font-medium text-indigo-700 bg-indigo-50/70 border border-indigo-200/60 rounded-lg p-2.5 flex items-center gap-1.5">
+            <CheckCircle2 size={14} className="text-indigo-600" />
             Lifecycle Concluded: Deposit transitioned to {fdr.status}
           </div>
         )}
       </div>
 
       {/* Section 2: Time Machine Version History Slider */}
-      <div className="card p-5 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-line pb-3">
+      <div className="bg-white border border-slate-200/80 rounded-xl shadow-xs p-5 sm:p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-brand/10 text-brand">
+            <div className="p-1.5 rounded-lg bg-indigo-50 text-indigo-600">
               <History size={16} />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-ink">Time Machine: Version History Slider</h2>
-              <p className="text-xs text-muted">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800">
+                Time Machine: Version History Slider
+              </h2>
+              <p className="text-xs text-slate-400">
                 Audit scrub back to historical snapshots of this security deposit
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold font-mono text-brand">
+            <span className="text-xs font-bold font-mono text-indigo-600 tracking-tight">
               Version {currentVersion.version} of {versions.length}
             </span>
-            <SimulatedChip text="Cryptographic Ledger" />
+            <span className="rounded bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 text-xs font-medium">
+              Cryptographic Ledger
+            </span>
           </div>
         </div>
 
         {/* Interactive Scrub Slider */}
         <div className="space-y-2 pt-1">
-          <div className="flex items-center justify-between text-xs text-muted font-mono">
+          <div className="flex items-center justify-between text-xs text-slate-400 font-mono">
             <span>v1 (Initial Upload)</span>
             <span>v{versions.length} (Latest State)</span>
           </div>
@@ -558,35 +562,37 @@ export default function FdrRecord() {
             step="1"
             value={selectedVersionIndex ?? versions.length - 1}
             onChange={(e) => setSelectedVersionIndex(Number(e.target.value))}
-            className="w-full accent-brand cursor-pointer"
+            className="w-full accent-indigo-600 cursor-pointer"
           />
         </div>
 
         {/* Current Selected Version Snapshot Card */}
-        <div className="rounded-xl border border-line bg-surface/60 p-4 space-y-2">
+        <div className="rounded-lg border border-slate-200/70 bg-slate-50/60 p-4 space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <span className="font-mono text-xs font-bold text-ink">
+              <span className="font-mono text-xs font-semibold text-slate-900 tracking-tight">
                 Version {currentVersion.version}: {currentVersion.label}
               </span>
               <StatusBadge status={currentVersion.status} />
             </div>
-            <div className="text-[11px] font-mono text-muted flex items-center gap-1">
+            <div className="text-[11px] font-mono text-slate-400 flex items-center gap-1">
               <Clock size={12} />
               {currentVersion.timestamp}
             </div>
           </div>
 
-          <p className="text-xs text-ink/80 leading-relaxed">
+          <p className="text-xs text-slate-600 leading-relaxed">
             {currentVersion.notes || 'Recorded in immutable audit log.'}
           </p>
 
-          <div className="flex items-center gap-4 text-xs font-mono pt-1 text-muted">
-            <span>Principal: <strong className="text-ink">{formatINR(currentVersion.amount)}</strong></span>
+          <div className="flex items-center gap-4 text-xs font-mono pt-1 text-slate-500">
+            <span>
+              Principal: <strong className="text-slate-900 tracking-tight">{formatINR(currentVersion.amount)}</strong>
+            </span>
             {currentVersion.version === versions.length ? (
-              <span className="text-ok-700 font-bold">● Live Active State</span>
+              <span className="text-emerald-600 font-medium">● Live Active State</span>
             ) : (
-              <span className="text-warn-700 font-bold">Historical Snapshot (Read Only)</span>
+              <span className="text-amber-600 font-medium">Historical Snapshot (Read Only)</span>
             )}
           </div>
         </div>
@@ -595,75 +601,75 @@ export default function FdrRecord() {
       {/* Section 3: Deposit Metadata & Bank CBS Comparison */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Submitted Metadata Card */}
-        <div className="card space-y-4">
-          <div className="flex items-center justify-between border-b border-line pb-3">
-            <h2 className="text-sm font-bold text-ink flex items-center gap-2">
-              <Building size={16} className="text-brand" />
+        <div className="bg-white border border-slate-200/80 rounded-xl shadow-xs p-5 space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
+              <Building size={16} className="text-indigo-600" />
               Deposit Certificate Details
             </h2>
-            <span className="text-xs font-mono text-muted">{fdr.institution_id}</span>
+            <span className="text-xs font-mono text-slate-400 font-semibold">{fdr.institution_id}</span>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 text-xs">
+          <div className="grid grid-cols-2 gap-3.5 text-xs">
             <div>
-              <span className="text-muted block text-[10px] uppercase font-bold">Beneficiary College</span>
-              <span className="font-semibold text-ink leading-tight block mt-0.5">
+              <span className="text-slate-400 block text-[10px] font-bold uppercase tracking-wider">Beneficiary College</span>
+              <span className="font-semibold text-slate-800 leading-tight block mt-0.5">
                 {fdr.institution_name}
               </span>
             </div>
 
             <div>
-              <span className="text-muted block text-[10px] uppercase font-bold">Issuing Bank</span>
-              <span className="font-semibold text-ink leading-tight block mt-0.5">{fdr.bank}</span>
-              <span className="text-muted text-[11px] block">{fdr.branch}</span>
+              <span className="text-slate-400 block text-[10px] font-bold uppercase tracking-wider">Issuing Bank</span>
+              <span className="font-semibold text-slate-800 leading-tight block mt-0.5">{fdr.bank}</span>
+              <span className="text-slate-400 text-[11px] block">{fdr.branch}</span>
             </div>
 
             <div>
-              <span className="text-muted block text-[10px] uppercase font-bold">Account # & IFSC</span>
-              <span className="font-mono font-medium text-ink block mt-0.5">
+              <span className="text-slate-400 block text-[10px] font-bold uppercase tracking-wider">Account # & IFSC</span>
+              <span className="font-mono font-semibold text-slate-900 tracking-tight block mt-0.5">
                 {fdr.account_number || '39019283719'}
               </span>
-              <span className="font-mono text-muted text-[10px]">{fdr.ifsc_code || 'SBIN0001092'}</span>
+              <span className="font-mono text-slate-400 text-[10px]">{fdr.ifsc_code || 'SBIN0001092'}</span>
             </div>
 
             <div>
-              <span className="text-muted block text-[10px] uppercase font-bold">Principal Deposit</span>
-              <span className="font-mono font-bold text-ink text-sm block mt-0.5">
+              <span className="text-slate-400 block text-[10px] font-bold uppercase tracking-wider">Principal Deposit</span>
+              <span className="font-mono font-bold text-slate-900 tracking-tight text-sm block mt-0.5">
                 {formatINR(fdr.amount)}
               </span>
-              <span className="text-muted text-[10px]">ROI: {fdr.roi}% p.a.</span>
+              <span className="text-slate-400 text-[10px]">ROI: {fdr.roi}% p.a.</span>
             </div>
 
             <div>
-              <span className="text-muted block text-[10px] uppercase font-bold">Tenure & Maturity</span>
-              <span className="font-mono text-ink block mt-0.5">
+              <span className="text-slate-400 block text-[10px] font-bold uppercase tracking-wider">Tenure & Maturity</span>
+              <span className="font-mono text-slate-800 block mt-0.5">
                 {fdr.start_date} to {fdr.maturity_date}
               </span>
-              <span className="text-muted text-[10px]">{fdr.tenure_months || 12} Months</span>
+              <span className="text-slate-400 text-[10px]">{fdr.tenure_months || 12} Months</span>
             </div>
 
             <div>
-              <span className="text-muted block text-[10px] uppercase font-bold">Joint Holder</span>
-              <span className="font-semibold text-ink block mt-0.5 leading-tight">
+              <span className="text-slate-400 block text-[10px] font-bold uppercase tracking-wider">Joint Holder</span>
+              <span className="font-semibold text-slate-800 block mt-0.5 leading-tight">
                 {fdr.joint_holder || 'Regional Officer, AICTE Western Region'}
               </span>
             </div>
           </div>
 
           {/* Lien Endorsement Box */}
-          <div className="rounded-xl border border-line bg-surface/50 p-3 flex items-center justify-between text-xs">
+          <div className="rounded-lg border border-slate-200/80 bg-slate-50/50 p-3 flex items-center justify-between text-xs">
             <div>
-              <span className="font-bold text-ink block">AICTE Joint Lien Endorsement</span>
-              <span className="text-[11px] text-muted">
+              <span className="font-semibold text-slate-800 block">AICTE Joint Lien Endorsement</span>
+              <span className="text-[11px] text-slate-400">
                 {fdr.aicte_lien_endorsed ? 'Stamped & Verified' : 'Clause Missing or Incomplete'}
               </span>
             </div>
             {fdr.aicte_lien_endorsed ? (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-ok-50 text-ok-700 ring-1 ring-ok-200">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200/60">
                 Endorsed
               </span>
             ) : (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-bad-50 text-bad-700 ring-1 ring-bad-200">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-rose-50 text-rose-700 border border-rose-200/60">
                 Not Endorsed
               </span>
             )}
@@ -671,64 +677,66 @@ export default function FdrRecord() {
         </div>
 
         {/* Bank CBS Earmarking Comparison Card */}
-        <div className="card space-y-4">
-          <div className="flex items-center justify-between border-b border-line pb-3">
-            <h2 className="text-sm font-bold text-ink flex items-center gap-2">
-              <Sparkles size={16} className="text-brand" />
+        <div className="bg-white border border-slate-200/80 rounded-xl shadow-xs p-5 space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
+              <Sparkles size={16} className="text-indigo-600" />
               Core Banking (CBS) Live Match
             </h2>
-            <SimulatedChip text="Simulated CBS API" />
+            <span className="rounded bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 text-xs font-medium">
+              Simulated CBS API
+            </span>
           </div>
 
           {fdr.bank_comparison ? (
             <div className="space-y-3 text-xs">
-              <div className="flex items-center justify-between rounded-xl bg-surface p-2.5">
-                <span className="text-muted">Gateway Verification Status:</span>
+              <div className="flex items-center justify-between rounded-lg bg-slate-50/80 border border-slate-100 p-2.5">
+                <span className="text-slate-500 font-medium">Gateway Verification Status:</span>
                 <span
-                  className={`font-bold font-mono px-2 py-0.5 rounded-md text-[11px] ${
+                  className={`font-semibold font-mono px-2 py-0.5 rounded-md text-[11px] ${
                     fdr.bank_comparison.match_status?.includes('Full Match')
-                      ? 'bg-ok-50 text-ok-700 ring-1 ring-ok-200'
-                      : 'bg-warn-50 text-warn-700 ring-1 ring-warn-200'
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60'
+                      : 'bg-amber-50 text-amber-700 border border-amber-200/60'
                   }`}
                 >
                   {fdr.bank_comparison.match_status}
                 </span>
               </div>
 
-              <div className="rounded-xl border border-line overflow-hidden">
+              <div className="rounded-lg border border-slate-200/80 overflow-hidden">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-surface/80 border-b border-line text-[10px] uppercase font-bold text-muted">
+                  <thead className="bg-slate-50/80 border-b border-slate-100 text-[10px] uppercase font-bold text-slate-400">
                     <tr>
-                      <th className="py-2 px-3">Field</th>
-                      <th className="py-2 px-3">Submitted</th>
-                      <th className="py-2 px-3">Bank CBS Live</th>
+                      <th className="py-2.5 px-3">Field</th>
+                      <th className="py-2.5 px-3">Submitted</th>
+                      <th className="py-2.5 px-3">Bank CBS Live</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-line font-mono text-[11px]">
+                  <tbody className="divide-y divide-slate-100 font-mono text-[11px]">
                     <tr>
-                      <td className="py-2 px-3 font-sans text-muted">FDR Number</td>
-                      <td className="py-2 px-3 text-ink font-bold">
+                      <td className="py-2.5 px-3 font-sans text-slate-500">FDR Number</td>
+                      <td className="py-2.5 px-3 text-slate-900 font-semibold tracking-tight">
                         {fdr.bank_comparison.submitted?.fdr_number}
                       </td>
-                      <td className="py-2 px-3 text-ok-700">
+                      <td className="py-2.5 px-3 text-emerald-700 font-semibold tracking-tight">
                         {fdr.bank_comparison.cbs_live?.fdr_number || 'Awaiting CBS'}
                       </td>
                     </tr>
                     <tr>
-                      <td className="py-2 px-3 font-sans text-muted">Principal Amount</td>
-                      <td className="py-2 px-3 text-ink">
+                      <td className="py-2.5 px-3 font-sans text-slate-500">Principal Amount</td>
+                      <td className="py-2.5 px-3 text-slate-900 font-semibold tracking-tight">
                         {formatINR(fdr.bank_comparison.submitted?.amount)}
                       </td>
-                      <td className="py-2 px-3 text-ok-700">
+                      <td className="py-2.5 px-3 text-emerald-700 font-semibold tracking-tight">
                         {formatINR(fdr.bank_comparison.cbs_live?.amount)}
                       </td>
                     </tr>
                     <tr>
-                      <td className="py-2 px-3 font-sans text-muted">Lien Marked</td>
-                      <td className="py-2 px-3 text-ink font-sans">
+                      <td className="py-2.5 px-3 font-sans text-slate-500">Lien Marked</td>
+                      <td className="py-2.5 px-3 text-slate-800 font-sans">
                         {fdr.bank_comparison.submitted?.lien_marked}
                       </td>
-                      <td className="py-2 px-3 text-ok-700 font-sans">
+                      <td className="py-2.5 px-3 text-emerald-700 font-sans">
                         {fdr.bank_comparison.cbs_live?.lien_marked || 'Unverified'}
                       </td>
                     </tr>
@@ -737,8 +745,8 @@ export default function FdrRecord() {
               </div>
 
               {fdr.bank_comparison.discrepancies?.length > 0 && (
-                <div className="rounded-xl border border-bad-200 bg-bad-50 p-2.5 text-xs text-bad-700 space-y-1">
-                  <span className="font-bold block">Discrepancy Flags:</span>
+                <div className="rounded-lg border border-rose-200 bg-rose-50 p-2.5 text-xs text-rose-700 space-y-1">
+                  <span className="font-semibold block">Discrepancy Flags:</span>
                   <ul className="list-disc list-inside text-[11px]">
                     {fdr.bank_comparison.discrepancies.map((d, i) => (
                       <li key={i}>{d}</li>
@@ -748,7 +756,7 @@ export default function FdrRecord() {
               )}
             </div>
           ) : (
-            <div className="text-center py-6 text-xs text-muted">
+            <div className="text-center py-6 text-xs text-slate-400">
               No CBS inquiry recorded yet. Click "Simulate CBS Verify" above.
             </div>
           )}
@@ -758,13 +766,13 @@ export default function FdrRecord() {
       {/* Section 4: Documents & Remarks */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Uploaded Documents List */}
-        <div className="card space-y-4">
-          <div className="flex items-center justify-between border-b border-line pb-3">
-            <h2 className="text-sm font-bold text-ink flex items-center gap-2">
-              <FileText size={16} className="text-brand" />
+        <div className="bg-white border border-slate-200/80 rounded-xl shadow-xs p-5 space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
+              <FileText size={16} className="text-indigo-600" />
               Attached Deposit Documents
             </h2>
-            <span className="text-xs font-mono text-muted">
+            <span className="text-xs font-mono text-slate-400 font-semibold">
               {fdr.documents?.length || 0} Files
             </span>
           </div>
@@ -773,15 +781,15 @@ export default function FdrRecord() {
             {(fdr.documents || []).map((doc) => (
               <div
                 key={doc.id}
-                className="flex items-center justify-between p-3 rounded-xl border border-line bg-surface/50 hover:bg-surface transition-colors"
+                className="flex items-center justify-between p-3 rounded-lg border border-slate-200/80 bg-slate-50/50 hover:bg-slate-50 transition-colors"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="p-2 rounded-lg bg-card border border-line text-brand shrink-0">
-                    <FileText size={16} />
+                  <div className="p-2 rounded-lg bg-white border border-slate-200 text-indigo-600 shrink-0 shadow-2xs">
+                    <FileText size={15} />
                   </div>
                   <div className="min-w-0">
-                    <div className="text-xs font-bold text-ink truncate">{doc.name}</div>
-                    <div className="text-[10px] text-muted font-mono">
+                    <div className="text-xs font-semibold text-slate-800 truncate font-mono tracking-tight">{doc.name}</div>
+                    <div className="text-[10px] text-slate-400 font-mono">
                       {doc.size} • {doc.uploaded_at?.split('T')[0]}
                     </div>
                   </div>
@@ -790,7 +798,7 @@ export default function FdrRecord() {
                 <button
                   type="button"
                   onClick={() => alert(`Simulated document viewer: ${doc.name}`)}
-                  className="btn btn-ghost text-xs p-1.5"
+                  className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 text-xs p-1.5 rounded-lg transition-all cursor-pointer"
                   title="Simulate Document View"
                 >
                   <ExternalLink size={13} />
@@ -801,13 +809,13 @@ export default function FdrRecord() {
         </div>
 
         {/* Remarks & Advisory Thread */}
-        <div className="card space-y-4">
-          <div className="flex items-center justify-between border-b border-line pb-3">
-            <h2 className="text-sm font-bold text-ink flex items-center gap-2">
-              <MessageSquare size={16} className="text-brand" />
+        <div className="bg-white border border-slate-200/80 rounded-xl shadow-xs p-5 space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
+              <MessageSquare size={16} className="text-indigo-600" />
               Remarks & Scrutiny Notes
             </h2>
-            <span className="text-xs font-mono text-muted">
+            <span className="text-xs font-mono text-slate-400 font-semibold">
               {fdr.remarks?.length || 0} Notes
             </span>
           </div>
@@ -816,31 +824,34 @@ export default function FdrRecord() {
             {(fdr.remarks || []).map((rem) => (
               <div
                 key={rem.id}
-                className="rounded-xl border border-line bg-surface/60 p-3 space-y-1 text-xs"
+                className="rounded-lg border border-slate-100 bg-slate-50/60 p-3 space-y-1 text-xs"
               >
                 <div className="flex items-center justify-between text-[11px]">
-                  <span className="font-bold text-ink">
-                    {rem.author} <span className="text-muted font-normal">({rem.role})</span>
+                  <span className="font-semibold text-slate-800">
+                    {rem.author} <span className="text-slate-400 font-normal">({rem.role})</span>
                   </span>
-                  <span className="font-mono text-muted text-[10px]">
+                  <span className="font-mono text-slate-400 text-[10px]">
                     {rem.timestamp?.split('T')[0]}
                   </span>
                 </div>
-                <p className="text-ink/90 leading-relaxed text-[11px]">{rem.text}</p>
+                <p className="text-slate-600 leading-relaxed text-[11px]">{rem.text}</p>
               </div>
             ))}
           </div>
 
           {/* Add Remark Form */}
-          <form onSubmit={handleAddRemark} className="flex items-center gap-2 pt-2 border-t border-line">
+          <form onSubmit={handleAddRemark} className="flex items-center gap-2 pt-2 border-t border-slate-100">
             <input
               type="text"
               placeholder="Add observation or compliance remark..."
               value={newRemark}
               onChange={(e) => setNewRemark(e.target.value)}
-              className="flex-1 px-3 py-1.5 text-xs rounded-xl bg-surface border border-line text-ink focus:outline-none focus:border-brand"
+              className="flex-1 px-3 py-1.5 text-xs rounded-lg bg-white border border-slate-200 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all placeholder:text-slate-400"
             />
-            <button type="submit" className="btn btn-primary text-xs shrink-0 px-3 py-1.5">
+            <button
+              type="submit"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs rounded-lg shadow-xs px-3 py-1.5 transition-all shrink-0 cursor-pointer"
+            >
               Add Note
             </button>
           </form>
@@ -848,27 +859,31 @@ export default function FdrRecord() {
       </div>
 
       {/* Section 5: Audit History Timeline */}
-      <div className="card space-y-4">
-        <div className="flex items-center justify-between border-b border-line pb-3">
+      <div className="bg-white border border-slate-200/80 rounded-xl shadow-xs p-5 space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2">
-            <History size={16} className="text-brand" />
-            <h2 className="text-sm font-bold text-ink">Immutable Audit Trail</h2>
+            <History size={16} className="text-indigo-600" />
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800">
+              Immutable Audit Trail
+            </h2>
           </div>
-          <SimulatedChip text="SHA-256 Chained" />
+          <span className="rounded bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 text-xs font-medium">
+            SHA-256 Chained
+          </span>
         </div>
 
-        <div className="relative pl-6 space-y-4 border-l-2 border-line ml-3">
+        <div className="relative pl-6 space-y-4 border-l-2 border-slate-200 ml-3">
           {(fdr.history || []).map((h, i) => (
             <div key={i} className="relative group">
               {/* Dot on line */}
-              <div className="absolute -left-[31px] top-1.5 h-3.5 w-3.5 rounded-full bg-card border-2 border-brand group-hover:bg-brand transition-colors" />
+              <div className="absolute -left-[31px] top-1.5 h-3.5 w-3.5 rounded-full bg-white border-2 border-indigo-600 group-hover:bg-indigo-600 transition-colors shadow-2xs" />
 
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs">
-                <span className="font-bold text-ink">{h.action}</span>
-                <span className="font-mono text-[10px] text-muted">{h.timestamp}</span>
+                <span className="font-semibold text-slate-800">{h.action}</span>
+                <span className="font-mono text-[10px] text-slate-400">{h.timestamp}</span>
               </div>
-              <div className="text-[11px] text-muted mt-0.5">
-                Actor: <span className="text-ink font-semibold">{h.actor}</span> • Status: <StatusBadge status={h.status} />
+              <div className="text-[11px] text-slate-500 mt-0.5">
+                Actor: <span className="text-slate-700 font-medium">{h.actor}</span> • Status: <StatusBadge status={h.status} />
               </div>
             </div>
           ))}
@@ -877,76 +892,84 @@ export default function FdrRecord() {
 
       {/* MODAL 1: Fix & Resubmit Form Modal */}
       {showFixModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy/60 backdrop-blur-xs p-4 overflow-y-auto">
-          <div className="card max-w-lg w-full space-y-5 my-8">
-            <div className="flex items-center justify-between border-b border-line pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="bg-white border border-slate-200/80 rounded-xl shadow-xl max-w-lg w-full space-y-4 p-5 sm:p-6 my-8">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-ret-700 text-white">
+                <div className="p-1.5 rounded-lg bg-indigo-50 text-indigo-600">
                   <RotateCcw size={16} />
                 </div>
-                <h3 className="font-bold text-base text-ink">Fix & Resubmit Deposit</h3>
+                <h3 className="font-bold text-sm text-slate-900">Fix & Resubmit Deposit</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowFixModal(false)}
-                className="text-muted hover:text-ink p-1 rounded-lg"
+                className="text-slate-400 hover:text-slate-700 p-1 rounded-md"
               >
                 <X size={16} />
               </button>
             </div>
 
             <form onSubmit={handleFixSubmit} className="space-y-4 text-xs">
-              <div className="rounded-xl border border-ret-200 bg-ret-50/80 p-3 text-ret-700">
-                <span className="font-bold block">Correction Notice:</span>
+              <div className="rounded-lg border border-amber-200/80 bg-amber-50/70 p-3 text-amber-800">
+                <span className="font-semibold block">Correction Notice:</span>
                 Ensure AICTE Western Region is specified as joint holder and the lien clause is endorsed.
               </div>
 
               <div className="space-y-1">
-                <label className="font-bold text-ink">FDR Receipt Number</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  FDR Receipt Number
+                </label>
                 <input
                   type="text"
                   required
                   value={fixForm.fdr_number}
                   onChange={(e) => setFixForm({ ...fixForm, fdr_number: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-surface border border-line font-mono font-bold text-ink"
+                  className="w-full px-3 py-2 rounded-lg bg-white border border-slate-200 font-mono font-semibold text-slate-900 tracking-tight focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="font-bold text-ink">Scheduled Bank</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Scheduled Bank
+                </label>
                 <input
                   type="text"
                   required
                   value={fixForm.bank}
                   onChange={(e) => setFixForm({ ...fixForm, bank: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-surface border border-line text-ink"
+                  className="w-full px-3 py-2 rounded-lg bg-white border border-slate-200 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="font-bold text-ink">Principal Amount (INR)</label>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    Principal Amount (INR)
+                  </label>
                   <input
                     type="number"
                     required
                     value={fixForm.amount}
                     onChange={(e) => setFixForm({ ...fixForm, amount: Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-xl bg-surface border border-line font-mono text-ink"
+                    className="w-full px-3 py-2 rounded-lg bg-white border border-slate-200 font-mono font-semibold text-slate-900 tracking-tight focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-bold text-ink">Maturity Date</label>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    Maturity Date
+                  </label>
                   <input
                     type="date"
                     required
                     value={fixForm.maturity_date}
                     onChange={(e) => setFixForm({ ...fixForm, maturity_date: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-surface border border-line text-ink"
+                    className="w-full px-3 py-2 rounded-lg bg-white border border-slate-200 text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
                   />
                 </div>
               </div>
 
-              <div className="rounded-xl border border-line bg-surface/60 p-3 space-y-2">
+              <div className="rounded-lg border border-slate-200/80 bg-slate-50/50 p-3 space-y-2">
                 <label className="flex items-start gap-2.5 cursor-pointer">
                   <input
                     type="checkbox"
@@ -954,10 +977,10 @@ export default function FdrRecord() {
                     onChange={(e) =>
                       setFixForm({ ...fixForm, aicte_lien_endorsed: e.target.checked })
                     }
-                    className="mt-0.5 h-4 w-4 rounded border-line text-brand focus:ring-brand"
+                    className="mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500/20"
                   />
                   <div>
-                    <span className="font-bold text-ink">
+                    <span className="font-semibold text-slate-800">
                       I confirm the amended certificate has the AICTE Joint Lien Endorsement stamp
                     </span>
                   </div>
@@ -965,35 +988,39 @@ export default function FdrRecord() {
               </div>
 
               <div className="space-y-1">
-                <label className="font-bold text-ink">Upload Rectified PDF Certificate</label>
-                <div className="border border-dashed border-line rounded-xl p-3 text-center bg-surface">
-                  <span className="text-muted block text-[11px]">{fixForm.fileName}</span>
-                  <span className="text-[10px] text-brand font-semibold">Ready to upload</span>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Upload Rectified PDF Certificate
+                </label>
+                <div className="border border-dashed border-slate-300 rounded-lg p-3 text-center bg-slate-50/50">
+                  <span className="text-slate-700 block text-[11px] font-mono">{fixForm.fileName}</span>
+                  <span className="text-[10px] text-indigo-600 font-medium">Ready to upload</span>
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="font-bold text-ink">Resubmission Remark</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Resubmission Remark
+                </label>
                 <textarea
                   rows={2}
                   value={fixForm.remark}
                   onChange={(e) => setFixForm({ ...fixForm, remark: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-surface border border-line text-ink"
+                  className="w-full px-3 py-2 rounded-lg bg-white border border-slate-200 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 border-t border-line pt-3">
+              <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
                 <button
                   type="button"
                   onClick={() => setShowFixModal(false)}
-                  className="btn btn-ghost text-xs"
+                  className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium rounded-lg px-3 py-1.5 transition-all cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={actionLoading}
-                  className="btn btn-primary text-xs bg-ret-700 hover:opacity-90"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs rounded-lg shadow-xs px-3.5 py-2 transition-all cursor-pointer disabled:opacity-50"
                 >
                   {actionLoading ? 'Resubmitting...' : 'Confirm & Resubmit'}
                 </button>
@@ -1005,110 +1032,122 @@ export default function FdrRecord() {
 
       {/* MODAL 2: Renewal Form Modal */}
       {showRenewModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy/60 backdrop-blur-xs p-4 overflow-y-auto">
-          <div className="card max-w-lg w-full space-y-5 my-8">
-            <div className="flex items-center justify-between border-b border-line pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="bg-white border border-slate-200/80 rounded-xl shadow-xl max-w-lg w-full space-y-4 p-5 sm:p-6 my-8">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-renew-700 text-white">
+                <div className="p-1.5 rounded-lg bg-indigo-50 text-indigo-600">
                   <RotateCcw size={16} />
                 </div>
-                <h3 className="font-bold text-base text-ink">Submit Deposit Renewal</h3>
+                <h3 className="font-bold text-sm text-slate-900">Submit Deposit Renewal</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowRenewModal(false)}
-                className="text-muted hover:text-ink p-1 rounded-lg"
+                className="text-slate-400 hover:text-slate-700 p-1 rounded-md"
               >
                 <X size={16} />
               </button>
             </div>
 
             <form onSubmit={handleRenewSubmit} className="space-y-4 text-xs">
-              <div className="rounded-xl border border-renew-200 bg-renew-50/80 p-3 text-renew-700">
-                <span className="font-bold block">Renewal Rollover:</span>
+              <div className="rounded-lg border border-indigo-200/60 bg-indigo-50/70 p-3 text-indigo-800">
+                <span className="font-semibold block">Renewal Rollover:</span>
                 This will transition the current FDR to <strong>Renewed</strong> and create an updated active child security deposit.
               </div>
 
               <div className="space-y-1">
-                <label className="font-bold text-ink">Renewed FDR Number</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Renewed FDR Number
+                </label>
                 <input
                   type="text"
                   required
                   value={renewForm.new_fdr_number}
                   onChange={(e) => setRenewForm({ ...renewForm, new_fdr_number: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-surface border border-line font-mono font-bold text-ink"
+                  className="w-full px-3 py-2 rounded-lg bg-white border border-slate-200 font-mono font-semibold text-slate-900 tracking-tight focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="font-bold text-ink">Rollover Amount (INR)</label>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    Rollover Amount (INR)
+                  </label>
                   <input
                     type="number"
                     required
                     value={renewForm.amount}
                     onChange={(e) => setRenewForm({ ...renewForm, amount: Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-xl bg-surface border border-line font-mono text-ink"
+                    className="w-full px-3 py-2 rounded-lg bg-white border border-slate-200 font-mono font-semibold text-slate-900 tracking-tight focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-bold text-ink">Renewed ROI (% p.a.)</label>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    Renewed ROI (% p.a.)
+                  </label>
                   <input
                     type="number"
                     step="0.05"
                     value={renewForm.roi}
                     onChange={(e) => setRenewForm({ ...renewForm, roi: Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-xl bg-surface border border-line font-mono text-ink"
+                    className="w-full px-3 py-2 rounded-lg bg-white border border-slate-200 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="font-bold text-ink">Tenure (Months)</label>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    Tenure (Months)
+                  </label>
                   <input
                     type="number"
                     value={renewForm.tenure_months}
                     onChange={(e) =>
                       setRenewForm({ ...renewForm, tenure_months: Number(e.target.value) })
                     }
-                    className="w-full px-3 py-2 rounded-xl bg-surface border border-line text-ink"
+                    className="w-full px-3 py-2 rounded-lg bg-white border border-slate-200 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-bold text-ink">New Maturity Date</label>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    New Maturity Date
+                  </label>
                   <input
                     type="date"
                     required
                     value={renewForm.maturity_date}
                     onChange={(e) => setRenewForm({ ...renewForm, maturity_date: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-surface border border-line text-ink"
+                    className="w-full px-3 py-2 rounded-lg bg-white border border-slate-200 text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="font-bold text-ink">Renewal Remarks</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Renewal Remarks
+                </label>
                 <textarea
                   rows={2}
                   value={renewForm.remark}
                   onChange={(e) => setRenewForm({ ...renewForm, remark: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-surface border border-line text-ink"
+                  className="w-full px-3 py-2 rounded-lg bg-white border border-slate-200 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 border-t border-line pt-3">
+              <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
                 <button
                   type="button"
                   onClick={() => setShowRenewModal(false)}
-                  className="btn btn-ghost text-xs"
+                  className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium rounded-lg px-3 py-1.5 transition-all cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={actionLoading}
-                  className="btn btn-primary text-xs bg-renew-700 hover:opacity-90"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs rounded-lg shadow-xs px-3.5 py-2 transition-all cursor-pointer disabled:opacity-50"
                 >
                   {actionLoading ? 'Processing Renewal...' : 'Confirm Renewal Rollover'}
                 </button>
@@ -1120,60 +1159,64 @@ export default function FdrRecord() {
 
       {/* MODAL 3: Release Request Modal */}
       {showReleaseModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy/60 backdrop-blur-xs p-4 overflow-y-auto">
-          <div className="card max-w-lg w-full space-y-5 my-8">
-            <div className="flex items-center justify-between border-b border-line pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="bg-white border border-slate-200/80 rounded-xl shadow-xl max-w-lg w-full space-y-4 p-5 sm:p-6 my-8">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-brand text-white">
+                <div className="p-1.5 rounded-lg bg-indigo-50 text-indigo-600">
                   <FileCheck2 size={16} />
                 </div>
-                <h3 className="font-bold text-base text-ink">Request Security Deposit Release</h3>
+                <h3 className="font-bold text-sm text-slate-900">Request Security Deposit Release</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowReleaseModal(false)}
-                className="text-muted hover:text-ink p-1 rounded-lg"
+                className="text-slate-400 hover:text-slate-700 p-1 rounded-md"
               >
                 <X size={16} />
               </button>
             </div>
 
             <form onSubmit={handleReleaseSubmit} className="space-y-4 text-xs">
-              <div className="rounded-xl border border-info-200 bg-info-50/80 p-3 text-info-700">
-                <span className="font-bold block">Two-Person Authorization Rule:</span>
+              <div className="rounded-lg border border-indigo-200/60 bg-indigo-50/70 p-3 text-indigo-800">
+                <span className="font-semibold block">Two-Person Authorization Rule:</span>
                 This request will be routed to the AICTE Reviewer and dual-key Approver with cryptographic OTP signing.
               </div>
 
               <div className="space-y-1">
-                <label className="font-bold text-ink">Deposit to Release</label>
-                <div className="font-mono text-ink font-bold p-2.5 rounded-xl bg-surface border border-line">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Deposit to Release
+                </label>
+                <div className="font-mono text-slate-900 font-semibold p-2.5 rounded-lg bg-slate-50 border border-slate-200 tracking-tight">
                   {fdr.fdr_number} • {formatINR(fdr.amount)} ({fdr.bank})
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="font-bold text-ink">Reason / Statutory Justification *</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Reason / Statutory Justification *
+                </label>
                 <textarea
                   rows={3}
                   required
                   value={releaseReason}
                   onChange={(e) => setReleaseReason(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-surface border border-line text-ink"
+                  className="w-full px-3 py-2 rounded-lg bg-white border border-slate-200 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 border-t border-line pt-3">
+              <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
                 <button
                   type="button"
                   onClick={() => setShowReleaseModal(false)}
-                  className="btn btn-ghost text-xs"
+                  className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium rounded-lg px-3 py-1.5 transition-all cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={actionLoading}
-                  className="btn btn-primary text-xs"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs rounded-lg shadow-xs px-3.5 py-2 transition-all cursor-pointer disabled:opacity-50"
                 >
                   {actionLoading ? 'Submitting...' : 'Submit Release Request'}
                 </button>
@@ -1185,7 +1228,7 @@ export default function FdrRecord() {
 
       {/* MODAL 4: Digital QR Receipt Modal */}
       {showQrModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy/70 backdrop-blur-xs p-4 overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 overflow-y-auto">
           <div className="max-w-2xl w-full my-8">
             <QrReceiptCard
               fdr={fdr}

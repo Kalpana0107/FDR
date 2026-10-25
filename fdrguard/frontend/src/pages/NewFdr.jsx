@@ -96,50 +96,54 @@ export default function NewFdr() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6 text-slate-800">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <Link to="/" className="text-xs text-muted hover:text-brand font-medium">
+            <Link to="/" className="text-xs text-slate-400 hover:text-indigo-600 font-medium transition-colors">
               Home
             </Link>
-            <span className="text-muted text-xs">/</span>
-            <span className="text-xs text-ink font-semibold">Submit New FDR</span>
+            <span className="text-slate-300 text-xs">/</span>
+            <span className="text-xs text-slate-700 font-medium">Submit New FDR</span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-ink tracking-tight mt-1">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mt-1 font-heading">
             Submit Fixed Deposit Receipt
           </h1>
-          <p className="text-xs text-muted mt-0.5">
+          <p className="text-xs text-slate-400 mt-0.5">
             AICTE Western Regional Bureau Escrow & Compliance Registration
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <SimulatedChip text="OCR Engine Simulated" />
+          <span className="rounded bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 text-xs font-medium">
+            OCR Engine Simulated
+          </span>
         </div>
       </div>
 
       {error && (
-        <div className="rounded-xl border border-bad-200 bg-bad-50 p-4 text-xs text-bad-700 flex items-center gap-2">
-          <AlertTriangle size={16} className="shrink-0" />
+        <div className="rounded-xl border border-rose-200 bg-rose-50 p-3.5 text-xs text-rose-700 flex items-center gap-2">
+          <AlertTriangle size={15} className="shrink-0 text-rose-600" />
           <span>{error}</span>
         </div>
       )}
 
       {/* Step 1: Upload Document Card */}
-      <div className="card space-y-4">
+      <div className="bg-white border border-slate-200/80 rounded-xl shadow-xs p-5 sm:p-6 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand text-xs font-bold text-white">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white">
               1
             </span>
-            <h2 className="text-sm font-bold text-ink">Upload FDR Certificate Scan</h2>
+            <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+              Upload FDR Certificate Scan
+            </h2>
           </div>
-          <SimulatedChip text="Supports PDF, PNG, JPG" />
+          <span className="text-[10px] text-slate-400 font-medium">Supports PDF, PNG, JPG</span>
         </div>
 
-        <div className="relative border-2 border-dashed border-line hover:border-brand rounded-2xl p-6 sm:p-8 text-center transition-colors bg-surface/40">
+        <div className="relative border border-dashed border-slate-300 hover:border-indigo-500 rounded-xl p-6 sm:p-8 text-center transition-all bg-slate-50/50 hover:bg-slate-50">
           <input
             type="file"
             accept=".pdf,.png,.jpg,.jpeg"
@@ -150,37 +154,37 @@ export default function NewFdr() {
 
           {analyzing ? (
             <div className="space-y-3 py-4">
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-brand/10 text-brand animate-pulse">
-                <Sparkles size={24} />
+              <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 animate-pulse">
+                <Sparkles size={22} />
               </div>
-              <div className="text-sm font-bold text-ink">
+              <div className="text-sm font-semibold text-slate-800">
                 Simulated AI Engine: Running OCR & Lien Extraction...
               </div>
-              <p className="text-xs text-muted max-w-sm mx-auto">
+              <p className="text-xs text-slate-400 max-w-sm mx-auto">
                 Parsing bank seals, fixed deposit certificate text, and joint lien endorsements.
               </p>
             </div>
           ) : file ? (
             <div className="space-y-2 py-2">
-              <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-ok-50 text-ok-700">
-                <FileCheck2 size={22} />
+              <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+                <FileCheck2 size={20} />
               </div>
-              <div className="text-sm font-bold text-ink">{file.name}</div>
-              <div className="text-xs text-ok-700 font-semibold flex items-center justify-center gap-1">
+              <div className="text-sm font-semibold text-slate-800 font-mono tracking-tight">{file.name}</div>
+              <div className="text-xs text-emerald-600 font-medium flex items-center justify-center gap-1">
                 <CheckCircle2 size={13} />
                 OCR Extraction Completed ({Math.round(ocrConfidence * 100)}% Confidence)
               </div>
-              <p className="text-[11px] text-muted">Click or drop another file to replace</p>
+              <p className="text-[11px] text-slate-400">Click or drop another file to replace</p>
             </div>
           ) : (
             <div className="space-y-2 py-4">
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-surface text-brand border border-line">
-                <UploadCloud size={24} />
+              <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-white text-indigo-600 border border-slate-200 shadow-2xs">
+                <UploadCloud size={22} />
               </div>
-              <div className="text-sm font-bold text-ink">
+              <div className="text-sm font-semibold text-slate-800">
                 Drag and drop your bank FDR certificate, or browse
               </div>
-              <p className="text-xs text-muted max-w-sm mx-auto">
+              <p className="text-xs text-slate-400 max-w-sm mx-auto">
                 Upload official bank deposit receipt containing account number, interest rate, and AICTE joint lien endorsement.
               </p>
             </div>
@@ -189,17 +193,19 @@ export default function NewFdr() {
       </div>
 
       {/* Step 2: Confirm OCR Fields Form */}
-      <form onSubmit={handleSubmit} className="card space-y-6">
-        <div className="flex items-center justify-between border-b border-line pb-3">
+      <form onSubmit={handleSubmit} className="bg-white border border-slate-200/80 rounded-xl shadow-xs p-5 sm:p-6 space-y-6">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand text-xs font-bold text-white">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white">
               2
             </span>
-            <h2 className="text-sm font-bold text-ink">Confirm & Edit Extracted Fields</h2>
+            <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+              Confirm & Edit Extracted Fields
+            </h2>
           </div>
           {ocrCompleted && (
-            <div className="flex items-center gap-1.5 text-xs text-ok-700 font-semibold bg-ok-50 px-2.5 py-0.5 rounded-full ring-1 ring-ok-200">
-              <Sparkles size={13} />
+            <div className="flex items-center gap-1.5 text-xs text-emerald-700 font-medium bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/60">
+              <Sparkles size={12} />
               OCR Auto-Populated
             </div>
           )}
@@ -208,55 +214,65 @@ export default function NewFdr() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* FDR Number */}
           <div className="space-y-1">
-            <label className="text-xs font-bold text-ink">FDR Receipt Number *</label>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              FDR Receipt Number *
+            </label>
             <input
               type="text"
               required
               value={formData.fdr_number}
               onChange={(e) => setFormData({ ...formData, fdr_number: e.target.value })}
               placeholder="e.g. FDR-2026-000192"
-              className="w-full px-3.5 py-2 text-xs rounded-xl bg-surface border border-line font-mono font-bold text-ink focus:outline-none focus:border-brand"
+              className="w-full px-3 py-2 text-xs rounded-lg bg-white border border-slate-200 text-slate-800 font-mono font-semibold tracking-tight focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all"
             />
           </div>
 
           {/* Institution */}
           <div className="space-y-1">
-            <label className="text-xs font-bold text-ink">Institution Name</label>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              Institution Name
+            </label>
             <input
               type="text"
               required
               value={formData.institution_name}
               onChange={(e) => setFormData({ ...formData, institution_name: e.target.value })}
-              className="w-full px-3.5 py-2 text-xs rounded-xl bg-surface border border-line text-ink focus:outline-none focus:border-brand"
+              className="w-full px-3 py-2 text-xs rounded-lg bg-white border border-slate-200 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all"
             />
           </div>
 
           {/* Issuing Bank */}
           <div className="space-y-1">
-            <label className="text-xs font-bold text-ink">Issuing Scheduled Bank *</label>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              Issuing Scheduled Bank *
+            </label>
             <input
               type="text"
               required
               value={formData.bank}
               onChange={(e) => setFormData({ ...formData, bank: e.target.value })}
-              className="w-full px-3.5 py-2 text-xs rounded-xl bg-surface border border-line text-ink focus:outline-none focus:border-brand"
+              className="w-full px-3 py-2 text-xs rounded-lg bg-white border border-slate-200 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all"
             />
           </div>
 
           {/* Branch Name */}
           <div className="space-y-1">
-            <label className="text-xs font-bold text-ink">Bank Branch</label>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              Bank Branch
+            </label>
             <input
               type="text"
               value={formData.branch}
               onChange={(e) => setFormData({ ...formData, branch: e.target.value })}
-              className="w-full px-3.5 py-2 text-xs rounded-xl bg-surface border border-line text-ink focus:outline-none focus:border-brand"
+              className="w-full px-3 py-2 text-xs rounded-lg bg-white border border-slate-200 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all"
             />
           </div>
 
           {/* Principal Amount */}
           <div className="space-y-1">
-            <label className="text-xs font-bold text-ink">Principal Deposit Amount (INR) *</label>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              Principal Deposit Amount (INR) *
+            </label>
             <input
               type="number"
               required
@@ -264,60 +280,72 @@ export default function NewFdr() {
               step="1000"
               value={formData.amount}
               onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
-              className="w-full px-3.5 py-2 text-xs rounded-xl bg-surface border border-line font-mono font-bold text-ink focus:outline-none focus:border-brand"
+              className="w-full px-3 py-2 text-xs rounded-lg bg-white border border-slate-200 text-slate-800 font-mono font-semibold tracking-tight focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all"
             />
           </div>
 
           {/* Rate of Interest */}
           <div className="space-y-1">
-            <label className="text-xs font-bold text-ink">Rate of Interest (% p.a.)</label>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              Rate of Interest (% p.a.)
+            </label>
             <input
               type="number"
               step="0.05"
               value={formData.roi}
               onChange={(e) => setFormData({ ...formData, roi: Number(e.target.value) })}
-              className="w-full px-3.5 py-2 text-xs rounded-xl bg-surface border border-line font-mono text-ink focus:outline-none focus:border-brand"
+              className="w-full px-3 py-2 text-xs rounded-lg bg-white border border-slate-200 text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all"
             />
           </div>
 
           {/* Start Date */}
           <div className="space-y-1">
-            <label className="text-xs font-bold text-ink">Deposit Start Date</label>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              Deposit Start Date
+            </label>
             <input
               type="date"
               value={formData.start_date}
               onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-              className="w-full px-3.5 py-2 text-xs rounded-xl bg-surface border border-line text-ink focus:outline-none focus:border-brand"
+              className="w-full px-3 py-2 text-xs rounded-lg bg-white border border-slate-200 text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all"
             />
           </div>
 
           {/* Maturity Date */}
           <div className="space-y-1">
-            <label className="text-xs font-bold text-ink">Maturity Date *</label>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              Maturity Date *
+            </label>
             <input
               type="date"
               required
               value={formData.maturity_date}
               onChange={(e) => setFormData({ ...formData, maturity_date: e.target.value })}
-              className="w-full px-3.5 py-2 text-xs rounded-xl bg-surface border border-line text-ink focus:outline-none focus:border-brand"
+              className="w-full px-3 py-2 text-xs rounded-lg bg-white border border-slate-200 text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all"
             />
           </div>
         </div>
 
         {/* Joint Holder & AICTE Lien Endorsement */}
-        <div className="rounded-xl border border-line bg-surface/50 p-4 space-y-3">
+        <div className="rounded-lg border border-slate-200/80 bg-slate-50/50 p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-ink">AICTE Joint Holder & Earmarking Clause</span>
-            <SimulatedChip text="Mandatory for Bank Match" />
+            <span className="text-xs font-semibold text-slate-800">
+              AICTE Joint Holder & Earmarking Clause
+            </span>
+            <span className="rounded bg-slate-200/60 px-1.5 py-0.5 text-[9px] font-medium text-slate-600">
+              Mandatory for Bank Match
+            </span>
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs text-muted">Joint Holder Registered Designation</label>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              Joint Holder Registered Designation
+            </label>
             <input
               type="text"
               value={formData.joint_holder}
               onChange={(e) => setFormData({ ...formData, joint_holder: e.target.value })}
-              className="w-full px-3.5 py-2 text-xs rounded-xl bg-card border border-line text-ink focus:outline-none focus:border-brand"
+              className="w-full px-3 py-2 text-xs rounded-lg bg-white border border-slate-200 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all"
             />
           </div>
 
@@ -328,13 +356,13 @@ export default function NewFdr() {
               onChange={(e) =>
                 setFormData({ ...formData, aicte_lien_endorsed: e.target.checked })
               }
-              className="mt-0.5 h-4 w-4 rounded border-line text-brand focus:ring-brand"
+              className="mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500/20"
             />
             <div className="text-xs">
-              <span className="font-bold text-ink">
+              <span className="font-semibold text-slate-800">
                 Bank Certificate carries official AICTE Lien Endorsement Stamp
               </span>
-              <p className="text-muted text-[11px] mt-0.5">
+              <p className="text-slate-400 text-[11px] mt-0.5">
                 Unchecking this will simulate a bank CBS discrepancy (Status: Returned) for testing the Fix-and-Resubmit workflow.
               </p>
             </div>
@@ -343,24 +371,29 @@ export default function NewFdr() {
 
         {/* Remarks */}
         <div className="space-y-1">
-          <label className="text-xs font-bold text-ink">College Remarks / Submission Justification</label>
+          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            College Remarks / Submission Justification
+          </label>
           <textarea
             rows={2}
             value={formData.remarks}
             onChange={(e) => setFormData({ ...formData, remarks: e.target.value })}
-            className="w-full px-3.5 py-2 text-xs rounded-xl bg-surface border border-line text-ink focus:outline-none focus:border-brand"
+            className="w-full px-3 py-2 text-xs rounded-lg bg-white border border-slate-200 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all"
           />
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-line pt-4">
-          <Link to="/" className="btn btn-ghost text-xs w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100 pt-4">
+          <Link
+            to="/"
+            className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium rounded-lg px-3.5 py-2 transition-all w-full sm:w-auto text-center"
+          >
             Cancel
           </Link>
           <button
             type="submit"
             disabled={submitting}
-            className="btn btn-primary text-xs w-full sm:w-auto px-6 py-2.5"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs rounded-lg shadow-xs px-4 py-2.5 transition-all inline-flex items-center justify-center gap-1.5 w-full sm:w-auto cursor-pointer disabled:opacity-50"
           >
             {submitting ? 'Registering Security Deposit...' : 'Confirm & Submit FDR'}
             <ArrowRight size={14} />
