@@ -386,7 +386,7 @@ async def upload_document(
         original_filename=file.filename or "upload",
         storage_key=storage_key,
         file_size=file_size,
-        mime_type=mime or "application/octet-stream",
+        mime_type=file.content_type or "application/octet-stream",
         document_type=document_type,
     )
     db.add(doc)

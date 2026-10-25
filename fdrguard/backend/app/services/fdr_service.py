@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from ..models.fdr import FDRRecord, FDRStatus
 from ..models.audit import StatusHistory, AuditEvent
 from ..models.user import User, UserRole
+from ..models.fdr_version import FDRVersion
 from fastapi import HTTPException, status
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -73,8 +74,15 @@ def transition_status(
     new_status: FDRStatus,
     actor: User,
     remark: Optional[str] = None,
+    privileged_roles: Optional[set] = None,
 ) -> FDRRecord:
-    """Apply a validated status transition and record history."""
+    """Apply a validated status transition and record history.
+
+    Args:
+        privileged_roles: Additional roles (beyond ADMIN_ROLES) that are permitted
+            to perform ADMIN_ONLY_TRANSITIONS for this specific call site.  Used by
+            bank_verify endpoint so BANK_VERIFIER can drive SUBMITTED→VERIFIED.
+    """
     current_status = record.status
 
     # Check allowed transitions
@@ -86,7 +94,8 @@ def transition_status(
         )
 
     # Check role permissions
-    if new_status in ADMIN_ONLY_TRANSITIONS and actor.role not in ADMIN_ROLES:
+    effective_privileged = (privileged_roles or set()) | ADMIN_ROLES
+    if new_status in ADMIN_ONLY_TRANSITIONS and actor.role not in effective_privileged:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only administrators can perform this status transition.",
@@ -128,6 +137,30 @@ def transition_status(
         }),
     )
     db.add(audit)
+
+    # Snapshot FDR version for history tracking
+    version_count = db.query(FDRVersion).filter(
+        FDRVersion.fdr_record_id == record.id
+    ).count()
+    snapshot = FDRVersion(
+        fdr_record_id=record.id,
+        version_number=version_count + 1,
+        fdr_number=record.fdr_number,
+        bank_name=record.bank_name,
+        branch_name=record.branch_name,
+        amount=record.amount,
+        issue_date=record.issue_date,
+        maturity_date=record.maturity_date,
+        status=new_status.value,
+        remarks=record.remarks,
+        changed_by_id=actor.id,
+        diff_summary=(
+            f"Status: {current_status.value} \u2192 {new_status.value}"
+            + (f" | Remark: {remark}" if remark else "")
+        ),
+    )
+    db.add(snapshot)
+
     db.commit()
     db.refresh(record)
     return record
