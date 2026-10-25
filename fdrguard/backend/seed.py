@@ -5,14 +5,17 @@ ALL DATA IS SYNTHETIC AND FOR DEMONSTRATION PURPOSES ONLY.
 No real bank or AICTE data is included.
 
 Demo credentials:
-  Admin:      admin@aicte.gov.in       / Admin@1234
-  College A:  college_a@techA.edu.in   / College@1234
-  College B:  college_b@techB.edu.in   / College@1234
+  Admin (OFFICER):  admin@aicte.gov.in          / Admin@1234
+  College A:        college_a@techA.edu.in       / College@1234
+  College B:        college_b@techB.edu.in       / College@1234
+  Bank Verifier:    bank_verifier@verify.in      / Verifier@1234
+  Approver:         approver@aicte.gov.in        / Approver@1234
+  Management:       management@aicte.gov.in      / Mgmt@1234
 """
 import sys
 import os
 import random
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.dirname(__file__))
 
@@ -73,8 +76,9 @@ def seed():
         db.flush()
 
         # ──────────────────────────────────
-        # Users
+        # Users — one demo user per role
         # ──────────────────────────────────
+        # ADMIN (maps to OFFICER in new scheme — kept for backward compat)
         admin = User(
             email="admin@aicte.gov.in",
             full_name="AICTE Administrator [DEMO]",
@@ -82,6 +86,7 @@ def seed():
             role=UserRole.ADMIN,
             is_active=True,
         )
+        # COLLEGE / COLLEGE_USER
         user_a = User(
             email="college_a@techA.edu.in",
             full_name="College A Officer [DEMO]",
@@ -98,7 +103,49 @@ def seed():
             is_active=True,
             institution_id=inst_b.id,
         )
-        db.add_all([admin, user_a, user_b])
+        # OFFICER
+        officer = User(
+            email="officer@aicte.gov.in",
+            full_name="AICTE Officer [DEMO]",
+            hashed_password=get_password_hash("Officer@1234"),
+            role=UserRole.OFFICER,
+            is_active=True,
+        )
+        # BANK_VERIFIER
+        bank_verifier = User(
+            email="bank_verifier@verify.in",
+            full_name="Bank Verification Officer [DEMO]",
+            hashed_password=get_password_hash("Verifier@1234"),
+            role=UserRole.BANK_VERIFIER,
+            is_active=True,
+        )
+        # APPROVER
+        approver = User(
+            email="approver@aicte.gov.in",
+            full_name="FDR Approver [DEMO]",
+            hashed_password=get_password_hash("Approver@1234"),
+            role=UserRole.APPROVER,
+            is_active=True,
+        )
+        # MANAGEMENT
+        management = User(
+            email="management@aicte.gov.in",
+            full_name="AICTE Management [DEMO]",
+            hashed_password=get_password_hash("Mgmt@1234"),
+            role=UserRole.MANAGEMENT,
+            is_active=True,
+        )
+        # COLLEGE role (new explicit college role)
+        college_user = User(
+            email="college@techC.edu.in",
+            full_name="College C Representative [DEMO]",
+            hashed_password=get_password_hash("College@1234"),
+            role=UserRole.COLLEGE,
+            is_active=True,
+            institution_id=inst_a.id,
+        )
+
+        db.add_all([admin, user_a, user_b, officer, bank_verifier, approver, management, college_user])
         db.flush()
 
         # ──────────────────────────────────
@@ -148,7 +195,7 @@ def seed():
                     purpose=random.choice(PURPOSES),
                     remarks="[SYNTHETIC DATA - NOT A REAL BANK INSTRUMENT]",
                     status=FDRStatus.DRAFT,
-                    created_at=datetime.utcnow() - timedelta(days=random.randint(1, 60)),
+                    created_at=datetime.now(timezone.utc) - timedelta(days=random.randint(1, 60)),
                 )
                 db.add(record)
                 db.flush()
@@ -190,9 +237,14 @@ def seed():
         print("\n" + "="*60)
         print("DEMO LOGIN CREDENTIALS")
         print("="*60)
-        print("  Admin:      admin@aicte.gov.in     | Admin@1234")
-        print("  College A:  college_a@techA.edu.in | College@1234")
-        print("  College B:  college_b@techB.edu.in | College@1234")
+        print("  Admin (OFFICER):  admin@aicte.gov.in          | Admin@1234")
+        print("  College A:        college_a@techA.edu.in       | College@1234")
+        print("  College B:        college_b@techB.edu.in       | College@1234")
+        print("  Officer:          officer@aicte.gov.in         | Officer@1234")
+        print("  Bank Verifier:    bank_verifier@verify.in      | Verifier@1234")
+        print("  Approver:         approver@aicte.gov.in        | Approver@1234")
+        print("  Management:       management@aicte.gov.in      | Mgmt@1234")
+        print("  College (new):    college@techC.edu.in         | College@1234")
         print("="*60)
         print("\n⚠️  ALL DATA IS SYNTHETIC — NOT FOR REAL USE\n")
 

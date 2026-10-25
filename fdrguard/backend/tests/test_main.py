@@ -2,6 +2,7 @@
 Backend test suite using pytest + httpx TestClient.
 Run with: pytest tests/ -v
 """
+import io
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -145,7 +146,7 @@ class TestFDRCreate:
         r = client.post("/api/fdr/", json=VALID_FDR_PAYLOAD, headers=auth_header(token))
         assert r.status_code == 201
         data = r.json()
-        assert data["status"] == "draft"
+        assert data["status"] == FDRStatus.DRAFT.value
         assert data["fdr_number"] == "FDR-TEST-0001"
         assert "application_id" in data
 
@@ -208,7 +209,7 @@ class TestAccessControl:
         # Try admin-only status update
         r2 = client.post(
             f"/api/fdr/{fdr_id}/status",
-            json={"new_status": "verified"},
+            json={"new_status": FDRStatus.VERIFIED.value},
             headers=auth_header(token),
         )
         assert r2.status_code == 403
@@ -226,7 +227,7 @@ class TestAccessControl:
 
         r2 = client.post(
             f"/api/fdr/{fdr_id}/status",
-            json={"new_status": "verified"},
+            json={"new_status": FDRStatus.VERIFIED.value},
             headers=auth_header(token),
         )
         assert r2.status_code == 403
@@ -250,44 +251,44 @@ class TestStatusTransitions:
 
     def test_full_verify_workflow(self, client, db):
         fdr_id, col_token, adm_token = self._create_and_submit(client, db)
-        # Admin: submitted -> under_review
-        r = client.post(f"/api/fdr/{fdr_id}/status", json={"new_status": "under_review"}, headers=auth_header(adm_token))
+        # Admin: Submitted -> Under Review
+        r = client.post(f"/api/fdr/{fdr_id}/status", json={"new_status": FDRStatus.UNDER_REVIEW.value}, headers=auth_header(adm_token))
         assert r.status_code == 200
-        assert r.json()["status"] == "under_review"
-        # Admin: under_review -> verified
-        r = client.post(f"/api/fdr/{fdr_id}/status", json={"new_status": "verified"}, headers=auth_header(adm_token))
+        assert r.json()["status"] == FDRStatus.UNDER_REVIEW.value
+        # Admin: Under Review -> Verified
+        r = client.post(f"/api/fdr/{fdr_id}/status", json={"new_status": FDRStatus.VERIFIED.value}, headers=auth_header(adm_token))
         assert r.status_code == 200
-        assert r.json()["status"] == "verified"
+        assert r.json()["status"] == FDRStatus.VERIFIED.value
 
     def test_return_requires_remark(self, client, db):
         fdr_id, col_token, adm_token = self._create_and_submit(client, db)
-        client.post(f"/api/fdr/{fdr_id}/status", json={"new_status": "under_review"}, headers=auth_header(adm_token))
-        r = client.post(f"/api/fdr/{fdr_id}/status", json={"new_status": "returned"}, headers=auth_header(adm_token))
+        client.post(f"/api/fdr/{fdr_id}/status", json={"new_status": FDRStatus.UNDER_REVIEW.value}, headers=auth_header(adm_token))
+        r = client.post(f"/api/fdr/{fdr_id}/status", json={"new_status": FDRStatus.RETURNED.value}, headers=auth_header(adm_token))
         assert r.status_code == 422
 
     def test_return_with_remark_succeeds(self, client, db):
         fdr_id, col_token, adm_token = self._create_and_submit(client, db)
-        client.post(f"/api/fdr/{fdr_id}/status", json={"new_status": "under_review"}, headers=auth_header(adm_token))
+        client.post(f"/api/fdr/{fdr_id}/status", json={"new_status": FDRStatus.UNDER_REVIEW.value}, headers=auth_header(adm_token))
         r = client.post(
             f"/api/fdr/{fdr_id}/status",
-            json={"new_status": "returned", "remark": "Please correct FDR number"},
+            json={"new_status": FDRStatus.RETURNED.value, "remark": "Please correct FDR number"},
             headers=auth_header(adm_token),
         )
         assert r.status_code == 200
-        assert r.json()["status"] == "returned"
+        assert r.json()["status"] == FDRStatus.RETURNED.value
 
     def test_resubmit_returned_record(self, client, db):
         fdr_id, col_token, adm_token = self._create_and_submit(client, db)
-        client.post(f"/api/fdr/{fdr_id}/status", json={"new_status": "under_review"}, headers=auth_header(adm_token))
+        client.post(f"/api/fdr/{fdr_id}/status", json={"new_status": FDRStatus.UNDER_REVIEW.value}, headers=auth_header(adm_token))
         client.post(
             f"/api/fdr/{fdr_id}/status",
-            json={"new_status": "returned", "remark": "Fix FDR number"},
+            json={"new_status": FDRStatus.RETURNED.value, "remark": "Fix FDR number"},
             headers=auth_header(adm_token),
         )
         # College resubmits
         r = client.post(f"/api/fdr/{fdr_id}/submit", headers=auth_header(col_token))
         assert r.status_code == 200
-        assert r.json()["status"] == "submitted"
+        assert r.json()["status"] == FDRStatus.SUBMITTED.value
 
     def test_invalid_transition_draft_to_verified(self, client, db):
         inst = make_institution(db, "Inv College", "IC001")
@@ -299,13 +300,13 @@ class TestStatusTransitions:
         adm_token = get_token(client, "adm2@aicte.gov.in")
         r = client.post("/api/fdr/", json=VALID_FDR_PAYLOAD, headers=auth_header(token))
         fdr_id = r.json()["id"]
-        r2 = client.post(f"/api/fdr/{fdr_id}/status", json={"new_status": "verified"}, headers=auth_header(adm_token))
+        r2 = client.post(f"/api/fdr/{fdr_id}/status", json={"new_status": FDRStatus.VERIFIED.value}, headers=auth_header(adm_token))
         assert r2.status_code == 422
 
     def test_rejection_requires_remark(self, client, db):
         fdr_id, col_token, adm_token = self._create_and_submit(client, db)
-        client.post(f"/api/fdr/{fdr_id}/status", json={"new_status": "under_review"}, headers=auth_header(adm_token))
-        r = client.post(f"/api/fdr/{fdr_id}/status", json={"new_status": "rejected"}, headers=auth_header(adm_token))
+        client.post(f"/api/fdr/{fdr_id}/status", json={"new_status": FDRStatus.UNDER_REVIEW.value}, headers=auth_header(adm_token))
+        r = client.post(f"/api/fdr/{fdr_id}/status", json={"new_status": FDRStatus.REJECTED.value}, headers=auth_header(adm_token))
         assert r.status_code == 422
 
 
@@ -335,3 +336,67 @@ class TestDashboardStats:
         r = client.get("/api/fdr/stats/admin", headers=auth_header(adm_token))
         assert r.status_code == 200
         assert "total_submitted" in r.json()
+
+
+# ─────────────────────────────────────────────
+# Upload validation tests
+# ─────────────────────────────────────────────
+class TestUploadValidation:
+    def _setup(self, client, db):
+        inst = make_institution(db, "Upload College", "UC001")
+        db.commit()
+        make_user(db, "uploader@college.edu", institution_id=inst.id)
+        db.commit()
+        token = get_token(client, "uploader@college.edu")
+        r = client.post("/api/fdr/", json=VALID_FDR_PAYLOAD, headers=auth_header(token))
+        fdr_id = r.json()["id"]
+        return fdr_id, token
+
+    def _make_pdf_bytes(self) -> bytes:
+        """Return minimal valid PDF bytes."""
+        return b"%PDF-1.4\n1 0 obj\n<< /Type /Catalog >>\nendobj\nxref\n0 2\ntrailer\n<< /Size 2 >>\n%%EOF"
+
+    def test_upload_valid_pdf(self, client, db):
+        fdr_id, token = self._setup(client, db)
+        pdf_bytes = self._make_pdf_bytes()
+        r = client.post(
+            f"/api/fdr/{fdr_id}/documents",
+            headers=auth_header(token),
+            files={"file": ("test.pdf", io.BytesIO(pdf_bytes), "application/pdf")},
+            data={"document_type": "fdr_document"},
+        )
+        assert r.status_code == 201
+
+    def test_upload_non_pdf_extension_rejected(self, client, db):
+        fdr_id, token = self._setup(client, db)
+        pdf_bytes = self._make_pdf_bytes()
+        r = client.post(
+            f"/api/fdr/{fdr_id}/documents",
+            headers=auth_header(token),
+            files={"file": ("test.jpg", io.BytesIO(pdf_bytes), "image/jpeg")},
+            data={"document_type": "fdr_document"},
+        )
+        assert r.status_code == 415
+
+    def test_upload_pdf_extension_but_wrong_content_rejected(self, client, db):
+        fdr_id, token = self._setup(client, db)
+        fake_content = b"\xff\xd8\xff\xe0" + b"\x00" * 100  # JPEG magic bytes
+        r = client.post(
+            f"/api/fdr/{fdr_id}/documents",
+            headers=auth_header(token),
+            files={"file": ("test.pdf", io.BytesIO(fake_content), "application/pdf")},
+            data={"document_type": "fdr_document"},
+        )
+        assert r.status_code == 415
+
+    def test_upload_oversized_file_rejected(self, client, db):
+        fdr_id, token = self._setup(client, db)
+        # Create a file slightly over 10 MB
+        large_content = b"%PDF-1.4\n" + b"x" * (10 * 1024 * 1024 + 1)
+        r = client.post(
+            f"/api/fdr/{fdr_id}/documents",
+            headers=auth_header(token),
+            files={"file": ("big.pdf", io.BytesIO(large_content), "application/pdf")},
+            data={"document_type": "fdr_document"},
+        )
+        assert r.status_code == 413

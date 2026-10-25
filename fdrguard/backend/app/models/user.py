@@ -1,5 +1,5 @@
 import enum
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum, ForeignKey, Text
 from sqlalchemy.orm import relationship
 from ..core.database import Base
@@ -7,7 +7,17 @@ from ..core.database import Base
 
 class UserRole(str, enum.Enum):
     COLLEGE_USER = "college_user"
+    COLLEGE = "college"
+    OFFICER = "officer"
+    BANK_VERIFIER = "bank_verifier"
+    APPROVER = "approver"
+    MANAGEMENT = "management"
+    # Legacy alias — ADMIN maps to OFFICER in logic
     ADMIN = "admin"
+
+
+def _utcnow():
+    return datetime.now(timezone.utc)
 
 
 class User(Base):
@@ -20,8 +30,8 @@ class User(Base):
     role = Column(Enum(UserRole), nullable=False, default=UserRole.COLLEGE_USER)
     is_active = Column(Boolean, default=True, nullable=False)
     institution_id = Column(Integer, ForeignKey("institutions.id"), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow)
 
     # Relationships
     institution = relationship("Institution", back_populates="users")

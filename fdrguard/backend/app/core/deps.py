@@ -7,6 +7,9 @@ from ..models.user import User, UserRole
 
 bearer_scheme = HTTPBearer()
 
+# Roles that have "admin / officer" level access (can perform status transitions, etc.)
+ADMIN_ROLES = {UserRole.ADMIN, UserRole.OFFICER, UserRole.MANAGEMENT, UserRole.APPROVER}
+
 
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
@@ -29,13 +32,15 @@ def get_current_user(
 
 
 def get_current_college_user(current_user: User = Depends(get_current_user)) -> User:
-    if current_user.role not in (UserRole.COLLEGE_USER, UserRole.ADMIN):
+    college_roles = {UserRole.COLLEGE_USER, UserRole.COLLEGE}
+    if current_user.role not in college_roles | ADMIN_ROLES:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient privileges")
     return current_user
 
 
 def get_current_admin(current_user: User = Depends(get_current_user)) -> User:
-    if current_user.role != UserRole.ADMIN:
+    """Allow admin-level access for ADMIN (legacy), OFFICER, MANAGEMENT, APPROVER."""
+    if current_user.role not in ADMIN_ROLES:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Administrator access required",

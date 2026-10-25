@@ -2,7 +2,7 @@
 FDR records API — college user endpoints.
 """
 import math
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status, UploadFile, File, Form
 from sqlalchemy import or_, func
@@ -23,7 +23,8 @@ from ..schemas.document import DocumentOut
 from ..services.fdr_service import (
     generate_application_id, transition_status, add_audit_event
 )
-from ..services.storage import storage_service, ALLOWED_MIME_TYPES
+from ..services.storage import storage_service, validate_upload
+from ..core.deps import ADMIN_ROLES
 
 router = APIRouter(prefix="/fdr", tags=["FDR Records"])
 
@@ -60,7 +61,7 @@ def college_stats(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    if current_user.role == UserRole.ADMIN:
+    if current_user.role in ADMIN_ROLES:
         raise HTTPException(status_code=403, detail="Use admin stats endpoint")
     if not current_user.institution_id:
         return CollegeDashboardStats(total=0, draft=0, submitted=0, under_review=0, returned=0, verified=0, rejected=0)
@@ -79,6 +80,10 @@ def college_stats(
         returned=count_status(FDRStatus.RETURNED),
         verified=count_status(FDRStatus.VERIFIED),
         rejected=count_status(FDRStatus.REJECTED),
+        active=count_status(FDRStatus.ACTIVE),
+        maturing=count_status(FDRStatus.MATURING),
+        released=count_status(FDRStatus.RELEASED),
+        withdrawn=count_status(FDRStatus.WITHDRAWN),
     )
 
 
@@ -116,7 +121,8 @@ def create_fdr(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    if current_user.role == UserRole.COLLEGE_USER and not current_user.institution_id:
+    college_roles = {UserRole.COLLEGE_USER, UserRole.COLLEGE}
+    if current_user.role in college_roles and not current_user.institution_id:
         raise HTTPException(status_code=400, detail="User has no associated institution")
 
     institution_id = current_user.institution_id
@@ -168,7 +174,8 @@ def update_fdr(
         raise HTTPException(status_code=404, detail="FDR record not found")
 
     # College users can only update their own institution's records
-    if current_user.role == UserRole.COLLEGE_USER:
+    college_roles = {UserRole.COLLEGE_USER, UserRole.COLLEGE}
+    if current_user.role in college_roles:
         if record.institution_id != current_user.institution_id:
             raise HTTPException(status_code=403, detail="Access denied")
         if record.status not in (FDRStatus.DRAFT, FDRStatus.RETURNED):
@@ -207,7 +214,8 @@ def submit_fdr(
     record = db.query(FDRRecord).filter(FDRRecord.id == fdr_id).first()
     if not record:
         raise HTTPException(status_code=404, detail="FDR record not found")
-    if current_user.role == UserRole.COLLEGE_USER and record.institution_id != current_user.institution_id:
+    college_roles = {UserRole.COLLEGE_USER, UserRole.COLLEGE}
+    if current_user.role in college_roles and record.institution_id != current_user.institution_id:
         raise HTTPException(status_code=403, detail="Access denied")
 
     record = transition_status(db, record, FDRStatus.SUBMITTED, current_user)
@@ -246,7 +254,8 @@ def list_fdrs(
     )
 
     # Scope: college users see only their institution
-    if current_user.role == UserRole.COLLEGE_USER:
+    college_roles = {UserRole.COLLEGE_USER, UserRole.COLLEGE}
+    if current_user.role in college_roles:
         q = q.filter(FDRRecord.institution_id == current_user.institution_id)
     else:
         # Admin filters
@@ -311,7 +320,8 @@ def get_fdr(
     if not record:
         raise HTTPException(status_code=404, detail="FDR record not found")
 
-    if current_user.role == UserRole.COLLEGE_USER and record.institution_id != current_user.institution_id:
+    college_roles = {UserRole.COLLEGE_USER, UserRole.COLLEGE}
+    if current_user.role in college_roles and record.institution_id != current_user.institution_id:
         raise HTTPException(status_code=403, detail="Access denied")
 
     return _build_fdr_detail(record)
@@ -357,16 +367,16 @@ async def upload_document(
     if not record:
         raise HTTPException(status_code=404, detail="FDR record not found")
 
-    if current_user.role == UserRole.COLLEGE_USER and record.institution_id != current_user.institution_id:
+    college_roles = {UserRole.COLLEGE_USER, UserRole.COLLEGE}
+    if current_user.role in college_roles and record.institution_id != current_user.institution_id:
         raise HTTPException(status_code=403, detail="Access denied")
-    if current_user.role == UserRole.COLLEGE_USER and record.status not in (FDRStatus.DRAFT, FDRStatus.RETURNED):
+    if current_user.role in college_roles and record.status not in (FDRStatus.DRAFT, FDRStatus.RETURNED):
         raise HTTPException(status_code=422, detail="Documents can only be uploaded on draft or returned records")
 
-    # Validate file type
-    mime = file.content_type or ""
-    ext = "." + (file.filename or "").rsplit(".", 1)[-1].lower() if "." in (file.filename or "") else ""
-    if mime not in ALLOWED_MIME_TYPES and ext not in {".pdf", ".jpg", ".jpeg", ".png", ".tif", ".tiff"}:
-        raise HTTPException(status_code=415, detail="File type not allowed. Accepted: PDF, JPEG, PNG, TIFF")
+    # Validate file using python-magic (PDF only, max 10 MB)
+    raw = await file.read()
+    validate_upload(raw, file.filename or "upload")
+    await file.seek(0)
 
     storage_key, file_size = await storage_service.save(file, prefix=f"fdr/{fdr_id}")
 
@@ -402,7 +412,8 @@ def download_document(
     record = db.query(FDRRecord).filter(FDRRecord.id == fdr_id).first()
     if not record:
         raise HTTPException(status_code=404, detail="FDR record not found")
-    if current_user.role == UserRole.COLLEGE_USER and record.institution_id != current_user.institution_id:
+    college_roles = {UserRole.COLLEGE_USER, UserRole.COLLEGE}
+    if current_user.role in college_roles and record.institution_id != current_user.institution_id:
         raise HTTPException(status_code=403, detail="Access denied")
 
     doc = db.query(Document).filter(Document.id == doc_id, Document.fdr_record_id == fdr_id).first()
@@ -433,7 +444,8 @@ def get_status_history(
     record = db.query(FDRRecord).filter(FDRRecord.id == fdr_id).first()
     if not record:
         raise HTTPException(status_code=404, detail="FDR record not found")
-    if current_user.role == UserRole.COLLEGE_USER and record.institution_id != current_user.institution_id:
+    college_roles = {UserRole.COLLEGE_USER, UserRole.COLLEGE}
+    if current_user.role in college_roles and record.institution_id != current_user.institution_id:
         raise HTTPException(status_code=403, detail="Access denied")
 
     history = db.query(StatusHistory).options(

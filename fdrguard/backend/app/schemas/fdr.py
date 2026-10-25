@@ -103,6 +103,11 @@ class CollegeDashboardStats(BaseModel):
     returned: int
     verified: int
     rejected: int
+    # Extended statuses
+    active: int = 0
+    maturing: int = 0
+    released: int = 0
+    withdrawn: int = 0
 
 
 class AdminDashboardStats(BaseModel):
