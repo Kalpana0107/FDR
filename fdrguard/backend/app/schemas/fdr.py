@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, field_validator, model_validator
 from ..models.fdr import FDRStatus
 from .document import DocumentOut
@@ -64,6 +64,7 @@ class FDRListItem(BaseModel):
     maturity_date: date
     purpose: str
     status: FDRStatus
+    parent_fdr_id: Optional[int] = None
     submitted_at: Optional[datetime]
     created_at: datetime
     updated_at: Optional[datetime]
@@ -72,15 +73,42 @@ class FDRListItem(BaseModel):
 
 
 class FDRDetail(FDRListItem):
-    branch_name: Optional[str]
-    remarks: Optional[str]
-    admin_remark: Optional[str]
+    branch_name: Optional[str] = None
+    remarks: Optional[str] = None
+    admin_remark: Optional[str] = None
     submitted_by_id: int
     submitted_by_name: Optional[str] = None
     documents: List[DocumentOut] = []
     status_history: List[StatusHistoryOut] = []
+    checklist: Optional[Dict[str, Any]] = None
+    renewal_chain: Optional[Dict[str, Any]] = None
 
     model_config = {"from_attributes": True}
+
+
+FDRDetail.model_rebuild()
+
+
+class FDRRenewalCreate(BaseModel):
+    fdr_number: Optional[str] = None
+    amount: Optional[Decimal] = None
+    currency: str = "INR"
+    issue_date: Optional[date] = None
+    maturity_date: date
+    purpose: Optional[str] = None
+    remarks: Optional[str] = None
+
+
+class OCRScanResponse(BaseModel):
+    success: bool
+    fdr_number: Optional[str] = None
+    bank_name: Optional[str] = None
+    amount: Optional[float] = None
+    issue_date: Optional[str] = None
+    maturity_date: Optional[str] = None
+    joint_lien_detected: bool = False
+    confidence: float = 0.0
+    raw_text_preview: Optional[str] = None
 
 
 class AdminStatusUpdate(BaseModel):

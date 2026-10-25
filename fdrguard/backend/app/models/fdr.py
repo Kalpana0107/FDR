@@ -58,6 +58,9 @@ class FDRRecord(Base):
     updated_at = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow)
     submitted_at = Column(DateTime(timezone=True), nullable=True)
 
+    # Renewal chain linkage
+    parent_fdr_id = Column(Integer, ForeignKey("fdr_records.id"), nullable=True, index=True)
+
     # Relationships
     institution = relationship("Institution", back_populates="fdr_records")
     submitted_by_user = relationship("User", back_populates="fdr_records", foreign_keys=[submitted_by_id])
@@ -67,6 +70,7 @@ class FDRRecord(Base):
     versions = relationship("FDRVersion", back_populates="fdr_record", order_by="FDRVersion.version_number")
     release_requests = relationship("ReleaseRequest", back_populates="fdr_record", order_by="ReleaseRequest.requested_at")
     bank_verifications = relationship("BankVerification", back_populates="fdr_record", order_by="BankVerification.checked_at")
+    parent_fdr = relationship("FDRRecord", remote_side=[id], backref="renewals")
 
     __table_args__ = (
         Index("ix_fdr_institution_status", "institution_id", "status"),

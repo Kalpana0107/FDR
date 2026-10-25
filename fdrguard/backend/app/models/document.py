@@ -16,7 +16,8 @@ class Document(Base):
     storage_key = Column(String(1024), nullable=False, unique=True)  # path or S3 key
     file_size = Column(BigInteger, nullable=False)
     mime_type = Column(String(128), nullable=False)
-    document_type = Column(String(50), nullable=False, default="fdr_document")  # fdr_document | supporting
+    document_type = Column(String(50), nullable=False, default="fdr_certificate")  # fdr_certificate | joint_lien_letter | bank_covering_letter | board_resolution | supporting
+    file_hash = Column(String(64), nullable=True, index=True)  # SHA-256 for duplicate file detection
 
     uploaded_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
