@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import {
   ShieldCheck,
   Search,
@@ -11,6 +12,7 @@ import {
   ArrowUpRight,
   Sparkles,
   SlidersHorizontal,
+  FilePlus2,
 } from 'lucide-react'
 import { api } from '../api/client.js'
 import { useAuth } from '../context/AuthContext.jsx'
@@ -276,19 +278,25 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Search box */}
-          <div className="relative max-w-md w-full">
-            <Search
-              size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
-            />
-            <input
-              type="text"
-              placeholder="Search by FDR #, institution, or bank…"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 text-xs rounded-xl bg-surface border border-line text-ink placeholder:text-muted focus:outline-none focus:border-brand transition-colors"
-            />
+          {/* Search box & Submit Action */}
+          <div className="flex items-center gap-2 max-w-lg w-full">
+            <div className="relative flex-1">
+              <Search
+                size={16}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
+              />
+              <input
+                type="text"
+                placeholder="Search by FDR #, institution, or bank…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 text-xs rounded-xl bg-surface border border-line text-ink placeholder:text-muted focus:outline-none focus:border-brand transition-colors"
+              />
+            </div>
+            <Link to="/fdrs/new" className="btn btn-primary text-xs shrink-0 py-2">
+              <FilePlus2 size={14} />
+              Submit FDR
+            </Link>
           </div>
         </div>
 
@@ -373,7 +381,13 @@ export default function Home() {
                   >
                     {/* FDR Number */}
                     <td className="py-3.5 px-4 font-mono font-bold text-ink">
-                      {fdr.fdr_number}
+                      <Link
+                        to={`/fdrs/${fdr.id}`}
+                        className="hover:text-brand hover:underline flex items-center gap-1 group-hover:text-brand transition-colors"
+                      >
+                        {fdr.fdr_number}
+                        <ArrowUpRight size={13} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </Link>
                     </td>
 
                     {/* Institution */}

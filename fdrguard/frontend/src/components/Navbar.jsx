@@ -4,6 +4,7 @@ import { ShieldCheck, Menu } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import SimulatedChip from './SimulatedChip.jsx'
 import RoleSwitcher from './RoleSwitcher.jsx'
+import NotificationBell from './NotificationBell.jsx'
 
 export default function Navbar({ onToggleSidebar }) {
   const { user } = useAuth()
@@ -49,8 +50,10 @@ export default function Navbar({ onToggleSidebar }) {
           <SimulatedChip text="Simulated CBS & HSM" className="hidden md:inline-flex ml-2" />
         </div>
 
-        {/* Right: Role Switcher & User Profile */}
-        <div className="flex items-center gap-2.5 sm:gap-3">
+        {/* Right: Notifications, Role Switcher & User Profile */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          <NotificationBell />
+
           {/* Quick Role Switcher */}
           <RoleSwitcher variant="dropdown" />
 
