@@ -1,7 +1,7 @@
-// file: src/pages/public/Register.jsx
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../../api/client.js';
+import { useNavigate, Link } from 'react-router-dom';
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
 export default function Register() {
   const navigate = useNavigate();
@@ -14,28 +14,50 @@ export default function Register() {
   });
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
-  const isMock = import.meta.env.VITE_USE_MOCK === 'true';
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: files ? files[0] : value,
-    }));
+    if (files) {
+      const file = files[0];
+      if (file) {
+        if (file.type !== 'application/pdf') {
+          setError('Only PDF files are accepted.');
+          e.target.value = '';
+          return;
+        }
+        if (file.size > MAX_FILE_SIZE) {
+          setError('File must be smaller than 10 MB.');
+          e.target.value = '';
+          return;
+        }
+        setError(null);
+      }
+      setForm((prev) => ({ ...prev, [name]: file || null }));
+    } else {
+      setForm((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitting) return;
     setError(null);
+
     if (form.password !== form.confirmPassword) {
-      setError('Passwords do not match');
+      setError('Passwords do not match.');
       return;
     }
+    if (form.password.length < 6) {
+      setError('Password must be at least 6 characters.');
+      return;
+    }
+
+    setSubmitting(true);
     try {
-      // In the mock implementation we just pretend the registration succeeded.
-      // Real implementation would POST a multipart/form‑data payload.
+      // Mock: just simulate a delay
+      const isMock = import.meta.env.VITE_USE_MOCK !== 'false';
       if (isMock) {
-        // mock endpoint (you can add a handler later)
         await new Promise((r) => setTimeout(r, 500));
       } else {
         const payload = new FormData();
@@ -43,31 +65,33 @@ export default function Register() {
         payload.append('email', form.email);
         payload.append('password', form.password);
         if (form.certificate) payload.append('certificate', form.certificate);
-        await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/auth/register`, {
+        const res = await fetch(`${import.meta.env.VITE_API_BASE || '/api'}/auth/register`, {
           method: 'POST',
           body: payload,
         });
+        if (!res.ok) throw new Error(`Registration failed: ${res.statusText}`);
       }
       setSuccess(true);
       setTimeout(() => navigate('/login'), 1500);
     } catch (err) {
-      setError(err.message || 'Registration failed');
+      setError(err.message || 'Registration failed. Please try again.');
+      setSubmitting(false);
     }
   };
 
   return (
-    <section aria-labelledby="register-heading" className="flex min-h-screen items-center justify-center bg-ink/5 p-4">
-      <div className="max-w-lg w-full bg-white dark:bg-ink p-8 rounded-lg shadow-md">
-        <h1 id="register-heading" className="text-2xl font-bold mb-6 text-center">
+    <section aria-labelledby="register-heading" className="flex min-h-[80vh] items-center justify-center p-4">
+      <div className="max-w-lg w-full card p-8">
+        <h1 id="register-heading" className="text-2xl font-bold mb-6 text-center text-ink">
           Register Your Institution
         </h1>
 
-        {error && <p className="text-danger mb-4" role="alert">{error}</p>}
-        {success && <p className="text-success mb-4">Registration successful! Redirecting to login…</p>}
+        {error && <p className="text-bad-700 bg-bad-50 border border-bad-200 rounded-lg px-3 py-2 text-sm mb-4" role="alert">{error}</p>}
+        {success && <p className="text-ok-700 bg-ok-50 border border-ok-200 rounded-lg px-3 py-2 text-sm mb-4">Registration successful! Redirecting to login…</p>}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <div>
-            <label htmlFor="institutionName" className="block text-sm font-medium mb-1">
+            <label htmlFor="institutionName" className="block text-sm font-medium mb-1 text-ink">
               Institution Name
             </label>
             <input
@@ -77,42 +101,43 @@ export default function Register() {
               required
               value={form.institutionName}
               onChange={handleChange}
-              className="w-full rounded border-gray-300 focus:ring-brand focus:border-brand"
+              className="w-full px-3 py-2 text-sm rounded-lg border border-line bg-surface text-ink focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand min-h-[44px]"
             />
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium mb-1">
+            <label htmlFor="reg-email" className="block text-sm font-medium mb-1 text-ink">
               Contact Email
             </label>
             <input
               type="email"
-              id="email"
+              id="reg-email"
               name="email"
               required
               value={form.email}
               onChange={handleChange}
-              className="w-full rounded border-gray-300 focus:ring-brand focus:border-brand"
+              className="w-full px-3 py-2 text-sm rounded-lg border border-line bg-surface text-ink focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand min-h-[44px]"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium mb-1">
+            <label htmlFor="reg-password" className="block text-sm font-medium mb-1 text-ink">
               Password
             </label>
             <input
               type="password"
-              id="password"
+              id="reg-password"
               name="password"
               required
+              minLength={6}
               value={form.password}
               onChange={handleChange}
-              className="w-full rounded border-gray-300 focus:ring-brand focus:border-brand"
+              className="w-full px-3 py-2 text-sm rounded-lg border border-line bg-surface text-ink focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand min-h-[44px]"
             />
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium mb-1">
+            <label htmlFor="confirmPassword" className="block text-sm font-medium mb-1 text-ink">
               Confirm Password
             </label>
             <input
@@ -122,13 +147,13 @@ export default function Register() {
               required
               value={form.confirmPassword}
               onChange={handleChange}
-              className="w-full rounded border-gray-300 focus:ring-brand focus:border-brand"
+              className="w-full px-3 py-2 text-sm rounded-lg border border-line bg-surface text-ink focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand min-h-[44px]"
             />
           </div>
 
           <div>
-            <label htmlFor="certificate" className="block text-sm font-medium mb-1">
-              Institution Certificate (PDF)
+            <label htmlFor="certificate" className="block text-sm font-medium mb-1 text-ink">
+              Institution Certificate (PDF only, max 10 MB)
             </label>
             <input
               type="file"
@@ -136,20 +161,24 @@ export default function Register() {
               name="certificate"
               accept="application/pdf"
               onChange={handleChange}
-              className="w-full"
+              className="w-full text-sm text-muted file:mr-3 file:rounded-lg file:border file:border-line file:bg-surface file:px-3 file:py-2 file:text-sm file:font-medium file:text-ink file:cursor-pointer min-h-[44px]"
             />
           </div>
 
-          <button type="submit" className="w-full btn btn-primary mt-2">
-            Register
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full btn btn-primary mt-2 min-h-[44px]"
+          >
+            {submitting ? 'Registering…' : 'Register'}
           </button>
         </form>
 
-        <p className="mt-4 text-center text-sm">
+        <p className="mt-4 text-center text-sm text-muted">
           Already have an account?{' '}
-          <a href="/login" className="text-brand hover:underline">
+          <Link to="/login" className="text-brand hover:underline">
             Log in here
-          </a>
+          </Link>
         </p>
       </div>
     </section>

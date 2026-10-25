@@ -26,7 +26,7 @@ export default function Navbar({ onToggleSidebar }) {
           )}
 
           <Link
-            to="/"
+            to="/app"
             className="flex items-center gap-2.5 hover:opacity-90 transition-opacity"
           >
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-xs">
